@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "target": "es6",
+        "lib": [
+            "es2015",
+            "es2017",
+            "dom"
+        ],
+        "module": "commonjs",
+        "outDir": "./",
+        "rootDir": "./src/",
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "noImplicitReturns": true,
+        "strictNullChecks": false,
+        "jsx": "react",
+        // "noUnusedLocals": true,
+        // "noUnusedParameters": true,
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.jsx",
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
