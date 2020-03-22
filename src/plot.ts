@@ -7,31 +7,31 @@ import { WorldData } from './types'
 const margin = { top: 20, right: 20, bottom: 30, left: 20 }
 const height = 400, width = 600
 
-let chart = d3.select('svg')
-    .attr("height", height)
-    .attr("width", width)
-    .append('g')
-    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+const create_chart = (world: WorldData) => {
 
-get_data()
-    .then((world: WorldData) => {
+    let chart = d3.select('svg')
+        .attr("height", height)
+        .attr("width", width)
+        .append('g')
+        .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
-        const dates = world.dates
-        const data = world.countries["Australia"][0]
-        console.log(data);
+    const dates = world.dates
 
-        let tip = d3tip()
-            .attr('class', 'd3-tip')
-            .offset([-10, 0])
-            .html((num: number, i: number) => {
-                const date = new Date(dates[i])
-                const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
-                const [{ value: mo }, , { value: da }, , { value: ye }] = dtf.formatToParts(date)
-                const date_pretty = `${da}-${mo}-${ye}`
-                return `<strong>${num} cases</strong><br>${date_pretty}`
-            })
+    let tip = d3tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html((num: number, i: number) => {
+            const date = new Date(dates[i])
+            const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
+            const [{ value: mo }, , { value: da }, , { value: ye }] = dtf.formatToParts(date)
+            const date_pretty = `${da}-${mo}-${ye}`
+            return `<strong>${num} cases</strong><br>${date_pretty}`
+        })
 
-        chart.call(tip)
+    chart.call(tip)
+
+    return (country: string) => {
+        const data = world.countries[country][0]
 
         let y = d3.scaleLinear()
             .domain([0, d3.max(data.cases)]).nice()
@@ -67,4 +67,10 @@ get_data()
             .attr("width", barWidth - 2)
             .on('mouseover', tip.show)
             .on('mouseout', tip.hide)
+    }
+}
+
+get_data()
+    .then((world: WorldData) => {
+        create_chart(world)("Australia")
     })
