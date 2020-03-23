@@ -5,9 +5,10 @@ import get_data from './data'
 import { WorldData } from './types'
 
 const margin = { top: 20, right: 20, bottom: 30, left: 20 }
-const height = 400, width = 600
+const height = 400, width = 600, delay = 1000
 
 const create_chart = (world: WorldData) => {
+    const dates = world.dates
 
     let chart = d3.select('svg')
         .attr("height", height)
@@ -15,7 +16,6 @@ const create_chart = (world: WorldData) => {
         .append('g')
         .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
-    const dates = world.dates
 
     let tip = d3tip()
         .attr('class', 'd3-tip')
@@ -30,6 +30,9 @@ const create_chart = (world: WorldData) => {
 
     chart.call(tip)
 
+    const t = chart.transition().duration(delay);
+    const title = chart.append("text").attr("x", 100)
+
     return (country: string) => {
         const data = world.countries[country][0]
 
@@ -37,40 +40,60 @@ const create_chart = (world: WorldData) => {
             .domain([0, d3.max(data.cases)]).nice()
             .range([height - margin.bottom, margin.top])
 
-        let x = d3.scaleTime()
-            .domain(world.dates)
+        let x = d3.scaleLinear()
+            .domain([0, dates.length])
             .range([0, width])
 
         let barWidth = width / world.dates.length
 
         chart.append("g")
             .attr("class", "axis x")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x).ticks(10));
 
         chart.append("g")
             .attr("class", "axis y")
             .call(d3.axisLeft(y).ticks(10))
 
-        chart.append("text")
-            .attr("x", 100)
-            .text(`${data.state && (data.state + ", ")}${data.country}`);
+        title.text(`${data.state && (data.state + ", ")}${data.country}`);
 
-        chart.selectAll('.bar')
+        const rect = chart.selectAll('.bar')
             .data(data.cases)
-            .enter()
-            .append('rect')
-            .attr('class', 'bar')
-            .attr('x', (_, i) => i * barWidth)
-            .attr('y', d => y(d))
-            .attr("height", d => height - margin.bottom - y(d))
-            .attr("width", barWidth - 2)
-            .on('mouseover', tip.show)
-            .on('mouseout', tip.hide)
+            .join(
+                enter =>
+                    enter.append('rect')
+                        .attr('class', 'bar')
+                        .attr('x', (_, i) => x(i))
+                        .attr('y', d => y(d))
+                        .attr("height", d => height - margin.bottom - y(d))
+                        .attr("width", barWidth - 2)
+                        .on('mouseover', tip.show)
+                        .on('mouseout', tip.hide),
+                update => update,
+                exit => exit.call(rect => rect.transition(t as any).remove()
+                    .attr("y", y(0))
+                    .attr("height", 0))
+            )
+
+        rect.transition(t as any)
+            .attr("y", d => y(d))
+            .attr("height", d => y(0) - y(d));
     }
 }
 
 get_data()
     .then((world: WorldData) => {
-        create_chart(world)("Australia")
+        let i = 0
+        const cs = ["Australia", "Thailand", "Canada"]
+
+        const updateData = create_chart(world)
+
+        const updateCountry = () => {
+            updateData(cs[i])
+            i += 1
+            i %= cs.length
+            setTimeout(updateCountry, 1000)
+        }
+
+        updateCountry()
     })
