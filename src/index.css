@@ -6,17 +6,8 @@
     fill: #cccccc;
 }
 
-.x path {
-    display: none;
-}
-
 svg {
     background-color: #eee;
-}
-
-h1 {
-    color     : steelblue;
-    text-align: center;
 }
 
 .d3-tip {
