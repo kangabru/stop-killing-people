@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
 // @ts-ignore
 import d3tip from 'd3-tip';
-import get_data from './data';
 import { WorldData } from './types';
 
 const margin = { top: 20, right: 20, bottom: 70, left: 50, text: 5 }
@@ -9,10 +8,11 @@ const height = 400, width = 600, delay = 1000
 const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
 
-const create_chart = (world: WorldData) => {
+const CreateChart = (world: WorldData) => {
     const dates = world.dates
     let barWidth = width / dates.length
 
+    // Root svg element
     const svg = d3.select('svg')
         .attr("height", height)
         .attr("width", width)
@@ -22,35 +22,29 @@ const create_chart = (world: WorldData) => {
         .attr("y", margin.top)
         .attr("text-anchor", "middle")
 
-    svg.append("text")
-        .attr("x", margin.left)
-        .attr("y", margin.top)
-        .attr("text-anchor", "end")
-        .text("Cases")
+    svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 30).attr("r", 6).attr("class", "color-1")
+    svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 50).attr("r", 6).attr("class", "color-2")
+    const legend1 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 35)
+    const legend2 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 55)
 
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height - margin.top + 6)
-        .attr("text-anchor", "middle")
-        .text("Days")
+    function updateInfo(country1: string, country2: string) {
+        title.text(country1 + " / " + country2)
+        legend1.text(country1)
+        legend2.text(country2)
+    }
 
-    const chart = svg.append('g')
-        .attr("transform", `translate(${margin.left}, ${margin.top})`)
+    // Axis labels
+    svg.append("text").attr("text-anchor", "end").attr("x", margin.left).attr("y", margin.top).text("Cases")
+    svg.append("text").attr("text-anchor", "middle").attr("x", width / 2).attr("y", height - margin.top + 6).text("Days")
 
-    const y = d3.scaleLinear()
-        .range([height - margin.bottom, margin.top])
+    // Plot area
+    const chart = svg.append('g').attr("transform", `translate(${margin.left}, ${margin.top})`)
 
-    const x = d3.scaleLinear()
-        .domain([0, dates.length])
-        .range([0, widthPlot])
+    const y = d3.scaleLinear().range([height - margin.bottom, margin.top])
+    const x = d3.scaleLinear().domain([0, dates.length]).range([0, widthPlot])
 
-    const xAxis = chart.append("g")
-        .attr("class", "axis x")
-        .attr("y", 100)
-        .attr("transform", `translate(0, ${margin.top + heightPlot})`)
-
-    const yAxis = chart.append("g")
-        .attr("class", "axis y")
+    const xAxis = chart.append("g").attr("class", "axis x").attr("y", 100).attr("transform", `translate(0, ${margin.top + heightPlot})`)
+    const yAxis = chart.append("g").attr("class", "axis y")
 
     const t = chart.transition().duration(delay)
 
@@ -66,21 +60,15 @@ const create_chart = (world: WorldData) => {
         })
     chart.call(tip)
 
-    return (country: string) => {
-        const data = world.countries[country][0]
+    const bars1 = chart.append('g')
+    const bars2 = chart.append('g')
 
-        y.domain([0, d3.max(data.cases)]).nice()
-
-        xAxis.call(d3.axisBottom(x).ticks(10))
-        yAxis.call(d3.axisLeft(y).ticks(10))
-
-        title.text(`${data.state && (data.state + ", ")}${data.country}`)
-
-        chart.selectAll('.bar')
-            .data(data.cases)
+    function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string) {
+        bars.selectAll('.bar')
+            .data(cases)
             .join(enter => enter
                 .append('rect')
-                .attr('class', 'bar')
+                .attr('class', 'bar ' + classes)
                 .attr('x', (_, i) => x(i))
                 .attr('y', d => y(d))
                 .attr("height", d => height - margin.bottom - y(d))
@@ -91,21 +79,22 @@ const create_chart = (world: WorldData) => {
             .attr("y", d => y(d))
             .attr("height", d => y(0) - y(d))
     }
+
+    return (countryName1: string, countryName2: string) => {
+        const country1 = world.countries[countryName1]
+        const country2 = world.countries[countryName2]
+
+        // Update title and legend
+        updateInfo(country1.name, country2.name)
+
+        // Update axis
+        xAxis.call(d3.axisBottom(x).ticks(10))
+        y.domain([0, d3.max([...country1.dailyCases, ...country2.dailyCases])]).nice()
+        yAxis.transition(t as any).call(d3.axisLeft(y).ticks(10))
+
+        drawBars(bars1, country1.dailyCases, "color-1")
+        drawBars(bars2, country2.dailyCases, "color-2")
+    }
 }
 
-get_data()
-    .then((world: WorldData) => {
-        let i = 0
-        const cs = ["Australia", "Thailand", "Canada"]
-
-        const updateData = create_chart(world)
-
-        const updateCountry = () => {
-            updateData(cs[i])
-            i += 1
-            i %= cs.length
-            setTimeout(updateCountry, 1000)
-        }
-
-        updateCountry()
-    })
+export { CreateChart }
