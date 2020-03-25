@@ -2,19 +2,27 @@ import './plot';
 import './index.less';
 import GetData from './data';
 import { CreateChart } from './plot';
-import { WorldData } from './types';
+import { WorldData, Country } from './types';
 
 const MIN_NUM_CASES = 100
 
 GetData()
     .then((world: WorldData) => {
+        const countries = Object.values(world.countries)
+            .filter(country => country.totalCases > MIN_NUM_CASES)
+            .sort((c0, c1) => c0.totalCases - c1.totalCases)
+            .reverse()
+
         const select1: HTMLSelectElement = document.getElementById('countries-1') as HTMLSelectElement
         const select2: HTMLSelectElement = document.getElementById('countries-2') as HTMLSelectElement
         const toggle: HTMLInputElement = document.getElementById('toggle') as HTMLInputElement
 
         const updateData = CreateChart(world.dates)
-        PopulateCountryInput(world, select1, 0)
-        PopulateCountryInput(world, select2, 1)
+        PopulateCountryInput(select1, countries)
+        PopulateCountryInput(select2, countries)
+
+        select1.value = "Italy"
+        select2.value = "US"
 
         const update = () => {
             const isAligned = toggle.checked
@@ -23,6 +31,13 @@ GetData()
             const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
             const countryMin = countryMax === country1 ? country2 : country1
             const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
+
+            const indexAtMinNumCasesMax = casesMax.findIndex(_case => _case > MIN_NUM_CASES)
+            const indexAtMinNumCasesMin = casesMin.findIndex(_case => _case > MIN_NUM_CASES)
+            const indexAtMinNumCases = Math.min(indexAtMinNumCasesMin, indexAtMinNumCasesMax)
+
+            casesMax.splice(0, indexAtMinNumCases)
+            casesMin.splice(0, indexAtMinNumCases)
 
             const matchingIndexMax = casesMax.findIndex(cases => cases >= countryMin.totalCases)
             const daysBehind = casesMin.length - matchingIndexMax - 1
@@ -37,11 +52,8 @@ GetData()
         toggle.addEventListener('change', update)
     })
 
-function PopulateCountryInput(world: WorldData, input: HTMLSelectElement, defaultIndex: number) {
-    const countries = Object.values(world.countries)
-        .filter(country => country.totalCases > MIN_NUM_CASES)
-        .sort((c0, c1) => c0.totalCases - c1.totalCases)
-        .reverse()
+function PopulateCountryInput(input: HTMLSelectElement, countries: Country[]) {
+    input.innerHTML = '' // remove existing children
 
     for (const country of countries) {
         const option = document.createElement("option")
@@ -49,6 +61,4 @@ function PopulateCountryInput(world: WorldData, input: HTMLSelectElement, defaul
         option.text = `${country.name} (${country.totalCases})`
         input.appendChild(option)
     }
-
-    input.value = countries[defaultIndex].name
 }

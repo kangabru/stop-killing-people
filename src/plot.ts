@@ -4,7 +4,7 @@ import d3tip from 'd3-tip';
 import { WorldData } from './types';
 
 const margin = { top: 20, right: 20, bottom: 70, left: 50, text: 5 }
-const height = 400, width = 600, duration = 1000
+const height = 400, width = 600
 const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
 
@@ -37,13 +37,11 @@ const CreateChart = (dates: Date[]) => {
     // Plot area
     const chart = svg.append('g').attr("transform", `translate(${margin.left}, ${margin.top})`)
 
-    const y = d3.scaleLinear().range([height - margin.bottom, margin.top])
     const x = d3.scaleLinear().range([0, widthPlot])
+    const y = d3.scaleLinear().range([height - margin.bottom, margin.top])
 
     const xAxis = chart.append("g").attr("class", "axis x").attr("y", 100).attr("transform", `translate(0, ${margin.top + heightPlot})`)
     const yAxis = chart.append("g").attr("class", "axis y")
-
-    const t = chart.transition().duration(duration)
 
     let tip = d3tip()
         .attr('class', 'd3-tip')
@@ -60,9 +58,8 @@ const CreateChart = (dates: Date[]) => {
     const bars1 = chart.append('g')
     const bars2 = chart.append('g').attr("transform", `translate(0, 0)`)
 
-    return (name1: string, name2: string, data1: number[], data2: number[], daysOffset: number = 0) => {
+    return (name1: string, name2: string, data1: number[], data2: number[], daysOffset: number) => {
         const numPoints = d3.max([data1.length, data2.length])
-        let barWidth = width / numPoints
 
         // Update title and legend
         updateInfo(name1, name2)
@@ -71,30 +68,33 @@ const CreateChart = (dates: Date[]) => {
         x.domain([0, numPoints])
         y.domain([0, d3.max([...data1, ...data2])]).nice()
 
-        xAxis.transition(t as any).call(d3.axisBottom(x).ticks(10))
-        yAxis.transition(t as any).call(d3.axisLeft(y).ticks(10))
+        xAxis.transition().call(d3.axisBottom(x).ticks(10))
+        yAxis.transition().call(d3.axisLeft(y).ticks(10))
 
-        function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string, offset: number = 0) {
-            bars.selectAll('.bar')
-                .data(cases)
-                .join(enter => enter
+        function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string, offset: boolean) {
+            const rect = bars.selectAll('.bar').data(cases).join(
+                enter => enter
                     .append('rect')
                     .attr('class', 'bar ' + classes)
                     .attr('x', (_, i) => x(i))
                     .attr('y', d => y(d))
                     .attr("height", d => height - margin.bottom - y(d))
-                    .attr("width", barWidth - 2)
+                    .attr("width", x(1) - 2)
                     .on('mouseover', tip.show)
-                    .on('mouseout', tip.hide))
-                .transition(t as any)
+                    .on('mouseout', tip.hide)
+            )
+
+            rect.transition()
+                .attr('x', (_, i) => x(i))
                 .attr("y", d => y(d))
+                .attr("width", x(1) - 2)
                 .attr("height", d => y(0) - y(d))
         }
 
-        drawBars(bars1, data1, "color-1")
-        drawBars(bars2, data2, "color-2")
+        drawBars(bars1, data1, "color-1", false)
+        drawBars(bars2, data2, "color-2", true)
 
-        bars2.transition(t as any).attr("transform", `translate(${x(daysOffset)}, 0)`)
+        bars2.transition().attr("transform", `translate(${x(daysOffset)}, 0)`)
     }
 }
 
