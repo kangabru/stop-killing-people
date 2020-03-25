@@ -4,7 +4,7 @@ import d3tip from 'd3-tip';
 import { WorldData } from './types';
 
 const margin = { top: 20, right: 20, bottom: 70, left: 50, text: 5 }
-const height = 400, width = 600, delay = 1000
+const height = 400, width = 600, duration = 1000
 const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
 
@@ -43,7 +43,7 @@ const CreateChart = (dates: Date[]) => {
     const xAxis = chart.append("g").attr("class", "axis x").attr("y", 100).attr("transform", `translate(0, ${margin.top + heightPlot})`)
     const yAxis = chart.append("g").attr("class", "axis y")
 
-    const t = chart.transition().duration(delay)
+    const t = chart.transition().duration(duration)
 
     let tip = d3tip()
         .attr('class', 'd3-tip')
@@ -58,10 +58,11 @@ const CreateChart = (dates: Date[]) => {
     chart.call(tip)
 
     const bars1 = chart.append('g')
-    const bars2 = chart.append('g')
+    const bars2 = chart.append('g').attr("transform", `translate(0, 0)`)
 
-    return (name1: string, name2: string, data1: number[], data2: number[]) => {
+    return (name1: string, name2: string, data1: number[], data2: number[], daysOffset: number = 0) => {
         const numPoints = d3.max([data1.length, data2.length])
+        let barWidth = width / numPoints
 
         // Update title and legend
         updateInfo(name1, name2)
@@ -74,7 +75,6 @@ const CreateChart = (dates: Date[]) => {
         yAxis.transition(t as any).call(d3.axisLeft(y).ticks(10))
 
         function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string, offset: number = 0) {
-            let barWidth = width / numPoints
             bars.selectAll('.bar')
                 .data(cases)
                 .join(enter => enter
@@ -93,6 +93,8 @@ const CreateChart = (dates: Date[]) => {
 
         drawBars(bars1, data1, "color-1")
         drawBars(bars2, data2, "color-2")
+
+        bars2.transition(t as any).attr("transform", `translate(${x(daysOffset)}, 0)`)
     }
 }
 
