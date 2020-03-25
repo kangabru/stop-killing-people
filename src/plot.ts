@@ -8,10 +8,7 @@ const height = 400, width = 600, delay = 1000
 const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
 
-const CreateChart = (world: WorldData) => {
-    const dates = world.dates
-    let barWidth = width / dates.length
-
+const CreateChart = (dates: Date[]) => {
     // Root svg element
     const svg = d3.select('svg')
         .attr("height", height)
@@ -41,7 +38,7 @@ const CreateChart = (world: WorldData) => {
     const chart = svg.append('g').attr("transform", `translate(${margin.left}, ${margin.top})`)
 
     const y = d3.scaleLinear().range([height - margin.bottom, margin.top])
-    const x = d3.scaleLinear().domain([0, dates.length]).range([0, widthPlot])
+    const x = d3.scaleLinear().range([0, widthPlot])
 
     const xAxis = chart.append("g").attr("class", "axis x").attr("y", 100).attr("transform", `translate(0, ${margin.top + heightPlot})`)
     const yAxis = chart.append("g").attr("class", "axis y")
@@ -63,37 +60,39 @@ const CreateChart = (world: WorldData) => {
     const bars1 = chart.append('g')
     const bars2 = chart.append('g')
 
-    function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string) {
-        bars.selectAll('.bar')
-            .data(cases)
-            .join(enter => enter
-                .append('rect')
-                .attr('class', 'bar ' + classes)
-                .attr('x', (_, i) => x(i))
-                .attr('y', d => y(d))
-                .attr("height", d => height - margin.bottom - y(d))
-                .attr("width", barWidth - 2)
-                .on('mouseover', tip.show)
-                .on('mouseout', tip.hide))
-            .transition(t as any)
-            .attr("y", d => y(d))
-            .attr("height", d => y(0) - y(d))
-    }
-
-    return (countryName1: string, countryName2: string) => {
-        const country1 = world.countries[countryName1]
-        const country2 = world.countries[countryName2]
+    return (name1: string, name2: string, data1: number[], data2: number[]) => {
+        const numPoints = d3.max([data1.length, data2.length])
 
         // Update title and legend
-        updateInfo(country1.name, country2.name)
+        updateInfo(name1, name2)
 
         // Update axis
-        xAxis.call(d3.axisBottom(x).ticks(10))
-        y.domain([0, d3.max([...country1.dailyCases, ...country2.dailyCases])]).nice()
+        x.domain([0, numPoints])
+        y.domain([0, d3.max([...data1, ...data2])]).nice()
+
+        xAxis.transition(t as any).call(d3.axisBottom(x).ticks(10))
         yAxis.transition(t as any).call(d3.axisLeft(y).ticks(10))
 
-        drawBars(bars1, country1.dailyCases, "color-1")
-        drawBars(bars2, country2.dailyCases, "color-2")
+        function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string, offset: number = 0) {
+            let barWidth = width / numPoints
+            bars.selectAll('.bar')
+                .data(cases)
+                .join(enter => enter
+                    .append('rect')
+                    .attr('class', 'bar ' + classes)
+                    .attr('x', (_, i) => x(i))
+                    .attr('y', d => y(d))
+                    .attr("height", d => height - margin.bottom - y(d))
+                    .attr("width", barWidth - 2)
+                    .on('mouseover', tip.show)
+                    .on('mouseout', tip.hide))
+                .transition(t as any)
+                .attr("y", d => y(d))
+                .attr("height", d => y(0) - y(d))
+        }
+
+        drawBars(bars1, data1, "color-1")
+        drawBars(bars2, data2, "color-2")
     }
 }
 
