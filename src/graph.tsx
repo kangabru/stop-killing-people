@@ -5,26 +5,31 @@ import './index.less';
 import GetData from './data';
 import { CreateChart } from './plot';
 import { WorldData, Country } from './types';
-import { Section } from './common';
+import { Section, Classes } from './common';
 
 const MIN_NUM_CASES = 100
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US"
 const CLASS_COLOR_1 = "bg-color1", CLASS_COLOR_2 = "bg-color2"
+const ID_CONTAINER_1 = "countries-1", ID_CONTAINER_2 = "countries-2"
 
 function Graph() {
-    React.useEffect(() => { makeGraph() }, []) // Only on load
+    const InputSection = (id: string, classColourDefault: string, text: string): [React.ReactNode, (color: string) => void] => {
+        const [classColor, setClassColor] = React.useState(classColourDefault)
 
-    const InputSection = (props: { id: string, text: string, classColour?: string }) =>
-        <Section classContainer={props.classColour} classContent="text-center">
-            <div className="mb-5 text-xl">{props.text}</div>
-            <select id={props.id} className="rounded px-3 py-2 mx-auto"></select>
-        </Section>
+        return [<Section classContainer={Classes("transition-colors duration-200 ease-in-out", classColor)} classContent="text-center">
+            <div className="mb-5 text-xl">{text}</div>
+            <select id={id} className="rounded px-3 py-2 mx-auto"></select>
+        </Section>, setClassColor]
+    }
+
+    const [section1, setColorSection1] = InputSection("countries-1", CLASS_COLOR_1, "Where are you?")
+    const [section2, setColorSection2] = InputSection("countries-2", CLASS_COLOR_2, "Compare with...")
+
+    React.useEffect(() => { makeGraph(setColorSection1, setColorSection2) }, []) // Only on load
 
     return <>
-        <InputSection id="countries-1" classColour="bg-red-200" text="Where are you?" />
-        <InputSection id="countries-2" classColour="bg-blue-200" text="Compare with..." />
-
+        {section1} {section2}
         <div className="flex flex-row justify-center">
             <input id="toggle" type="checkbox" defaultChecked={false}></input>
             <label htmlFor="toggle" className="ml-3">Aligned</label>
@@ -33,15 +38,15 @@ function Graph() {
     </>
 }
 
-const makeGraph = () => GetData()
+const makeGraph = (setColorSection1: (color: string) => void, setColorSection2: (color: string) => void) => GetData()
     .then((world: WorldData) => {
         const countries = Object.values(world.countries)
             .filter(country => country.totalCases > MIN_NUM_CASES)
             .sort((c0, c1) => c0.totalCases - c1.totalCases)
             .reverse()
 
-        const select1: HTMLSelectElement = document.getElementById('countries-1') as HTMLSelectElement
-        const select2: HTMLSelectElement = document.getElementById('countries-2') as HTMLSelectElement
+        const select1: HTMLSelectElement = document.getElementById(ID_CONTAINER_1) as HTMLSelectElement
+        const select2: HTMLSelectElement = document.getElementById(ID_CONTAINER_2) as HTMLSelectElement
         const toggle: HTMLInputElement = document.getElementById('toggle') as HTMLInputElement
 
         const updateData = CreateChart(world.dates)
@@ -56,8 +61,12 @@ const makeGraph = () => GetData()
             const countryMin = countryMax === country1 ? country2 : country1
             const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
 
-            PopulateCountryInput(select1, countries, countryMax.name, countryMax.name, countryMin.name)
-            PopulateCountryInput(select2, countries, countryMin.name, countryMax.name, countryMin.name)
+            PopulateCountryInput(select1, countries, country1.name, countryMax.name, countryMin.name)
+            PopulateCountryInput(select2, countries, country2.name, countryMax.name, countryMin.name)
+
+            const country1IsMax = country1 === countryMax
+            setColorSection1(country1IsMax ? CLASS_COLOR_1 : CLASS_COLOR_2)
+            setColorSection2(country1IsMax ? CLASS_COLOR_2 : CLASS_COLOR_1)
 
             const indexAtMinNumCasesMax = casesMax.findIndex(_case => _case > MIN_NUM_CASES)
             const indexAtMinNumCasesMin = casesMin.findIndex(_case => _case > MIN_NUM_CASES)
@@ -82,22 +91,13 @@ const makeGraph = () => GetData()
 function PopulateCountryInput(input: HTMLSelectElement, countries: Country[], countrySelected: string, countryMax: string, countryMin: string) {
     render(<>
         {countries.map(country => {
-            const colorClass = country.name === countryMax ? CLASS_COLOR_1 : country.name === countryMin ? CLASS_COLOR_2 : ""
-            return <option value={country.name} className={colorClass}>
-                {`${country.name} (${country.totalCases})`}
-            </option>
+            const name = country.name
+            const colorClass = name === countryMax ? CLASS_COLOR_1 : name === countryMin ? CLASS_COLOR_2 : ""
+            return <option key={name} value={name} className={colorClass}>{`${name} (${country.totalCases})`}</option>
         })}
     </>, input)
 
     input.value = countrySelected
-}
-
-function SetClasses(input: HTMLSelectElement, index: number, classes: string) {
-    for (let i = 0; i < input.children.length; i++) {
-        const child = input.children[i];
-        if (i === index) child.classList.add(classes)
-        else child.classList.remove(classes)
-    }
 }
 
 export default Graph
