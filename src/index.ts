@@ -39,6 +39,13 @@ GetData()
             casesMax.splice(0, indexAtMinNumCases)
             casesMin.splice(0, indexAtMinNumCases)
 
+            const indexMax = countries.findIndex(c => c.name === countryMax.name)
+            const indexMin = countries.findIndex(c => c.name === countryMin.name)
+            SetClasses(select1, indexMax, 'color-1')
+            SetClasses(select1, indexMin, 'color-2')
+            SetClasses(select2, indexMax, 'color-1')
+            SetClasses(select2, indexMin, 'color-2')
+
             const matchingIndexMax = casesMax.findIndex(cases => cases >= countryMin.totalCases)
             const daysBehind = casesMin.length - matchingIndexMax - 1
 
@@ -60,5 +67,13 @@ function PopulateCountryInput(input: HTMLSelectElement, countries: Country[]) {
         option.value = country.name
         option.text = `${country.name} (${country.totalCases})`
         input.appendChild(option)
+    }
+}
+
+function SetClasses(input: HTMLSelectElement, index: number, classes: string) {
+    for (let i = 0; i < input.children.length; i++) {
+        const child = input.children[i];
+        if (i === index) child.classList.add(classes)
+        else child.classList.remove(classes)
     }
 }

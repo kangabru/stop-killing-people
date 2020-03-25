@@ -1,21 +1,30 @@
-.bar {
-    opacity: 0.5;
+:root {
+    --color-1      : hsl(0, 40%, 60%);
+    --color-2      : hsl(240, 40%, 60%);
+    --color-1-light: hsl(0, 40%, 85%);
+    --color-2-light: hsl(240, 40%, 85%);
 }
 
 .color-1 {
-    fill: hsl(0, 40%, 60%);
+    fill   : var(--color-1);
+    opacity: 0.5;
 }
 
 .color-2 {
-    fill: hsl(240, 40%, 60%);
+    fill   : var(--color-2);
+    opacity: 0.5;
+}
+
+option.color-1 {
+    background-color: var(--color-1-light);
+}
+
+option.color-2 {
+    background-color: var(--color-2-light);
 }
 
 .bar:hover {
     opacity: 1;
-}
-
-svg {
-    background-color: #efefef;
 }
 
 .d3-tip {
