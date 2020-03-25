@@ -1,12 +1,13 @@
 import * as d3 from 'd3';
 // @ts-ignore
 import d3tip from 'd3-tip';
-import { WorldData } from './types';
 
 const margin = { top: 20, right: 20, bottom: 70, left: 50, text: 5 }
 const height = 400, width = 600
 const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
+
+const color1 = "svg-color1", color2 = "svg-color2"
 
 const CreateChart = (dates: Date[]) => {
     // Root svg element
@@ -19,8 +20,8 @@ const CreateChart = (dates: Date[]) => {
         .attr("y", margin.top)
         .attr("text-anchor", "middle")
 
-    svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 30).attr("r", 6).attr("class", "color-1")
-    svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 50).attr("r", 6).attr("class", "color-2")
+    svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 30).attr("r", 6).attr("class", color1)
+    svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 50).attr("r", 6).attr("class", color2)
     const legend1 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 35)
     const legend2 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 55)
 
@@ -91,8 +92,8 @@ const CreateChart = (dates: Date[]) => {
                 .attr("height", d => y(0) - y(d))
         }
 
-        drawBars(bars1, data1, "color-1", false)
-        drawBars(bars2, data2, "color-2", true)
+        drawBars(bars1, data1, color1, false)
+        drawBars(bars2, data2, color2, true)
 
         bars2.transition().attr("transform", `translate(${x(daysOffset)}, 0)`)
     }

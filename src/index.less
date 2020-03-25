@@ -1,26 +1,28 @@
-:root {
-    --color-1      : hsl(0, 40%, 60%);
-    --color-2      : hsl(240, 40%, 60%);
-    --color-1-light: hsl(0, 40%, 85%);
-    --color-2-light: hsl(240, 40%, 85%);
-}
+@import "../node_modules/tailwindcss/base.css";
+@import "../node_modules/tailwindcss/components.css";
+@import "../node_modules/tailwindcss/utilities.css";
 
-.color-1 {
-    fill   : var(--color-1);
+.svg {
+    @apply fill-current;
     opacity: 0.5;
 }
 
-.color-2 {
-    fill   : var(--color-2);
-    opacity: 0.5;
+.svg-color1 {
+    .svg;
+    @apply text-blue-300;
 }
 
-option.color-1 {
-    background-color: var(--color-1-light);
+.svg-color2 {
+    .svg;
+    @apply text-red-400;
 }
 
-option.color-2 {
-    background-color: var(--color-2-light);
+.bg-color1 {
+    @apply bg-blue-200;
+}
+
+.bg-color2 {
+    @apply bg-red-200;
 }
 
 .bar:hover {
