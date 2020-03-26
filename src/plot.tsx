@@ -14,7 +14,7 @@ const heightPlot = height - margin.top - margin.bottom,
 const SVG_ID = "svg-root"
 const color1 = "svg-color1", color2 = "svg-color2"
 
-type UpdateChartProps = { name1: string, name2: string, data1: number[], data2: number[], daysOffset: number }
+type UpdateChartProps = { country1: string, country2: string, daysBehindText: string, data1: number[], data2: number[], daysOffset: number }
 type UpdateChartFunc = (props: UpdateChartProps) => void
 
 function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Country, aligned: boolean }) {
@@ -41,7 +41,7 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
             const daysBehindText = ` (${daysBehind} day${daysBehind !== 1 ? "s" : ""} behind)`
 
             update({
-                name1: countryMax.name, name2: countryMin.name + daysBehindText,
+                country1: countryMax.name, country2: countryMin.name, daysBehindText,
                 data1: casesMax, data2: casesMin, daysOffset: aligned ? -daysBehind : 0
             })
         }
@@ -74,10 +74,10 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
     const legend1 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 35)
     const legend2 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 55)
 
-    function updateInfo(country1: string, country2: string) {
+    function updateInfo(country1: string, country2: string, daysBehindText: string) {
         title.text(country1 + " / " + country2)
         legend1.text(country1)
-        legend2.text(country2)
+        legend2.text(country2 + " " + daysBehindText)
     }
 
     // Axis labels
@@ -111,10 +111,10 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
     return (props: UpdateChartProps) => {
         if (!props) return
 
-        const { name1, name2, data1, data2, daysOffset } = props
+        const { country1, country2, daysBehindText, data1, data2, daysOffset } = props
         const numPoints = d3.max([data1.length, data2.length])
 
-        updateInfo(name1, name2)
+        updateInfo(country1, country2, daysBehindText)
 
         // Update axis
         x.domain([0, numPoints])
