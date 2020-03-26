@@ -4,14 +4,16 @@ import Graph from './chart-controls';
 import GetData from './data';
 import './index.less';
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faGithub, faGithubAlt } from '@fortawesome/free-brands-svg-icons'
-import { faFlushed, faLocationArrow } from '@fortawesome/free-solid-svg-icons'
 import { WorldData } from './types';
 import { Section } from './common';
+import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(faFlushed, faLocationArrow, faGithub, faGithubAlt)
+import { faGithub } from '@fortawesome/free-brands-svg-icons/faGithub'
+import { faFlushed } from '@fortawesome/free-solid-svg-icons/faFlushed'
+import { faLocationArrow } from '@fortawesome/free-solid-svg-icons/faLocationArrow'
+
+library.add(faFlushed, faLocationArrow, faGithub)
 
 GetData().then((world: WorldData) => {
     render(<Home world={world} />, document.getElementById("root"))
