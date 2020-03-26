@@ -1,103 +1,88 @@
 import * as React from 'react';
-import { render } from 'react-dom';
-import './plot';
-import './index.less';
-import GetData from './data';
-import { CreateChart } from './plot';
-import { WorldData, Country } from './types';
+import { WorldData, Country, Case } from './types';
 import { Section, Classes } from './common';
-
-const MIN_NUM_CASES = 100
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ChartSvg, { MIN_NUM_CASES } from './plot';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US"
 const CLASS_COLOR_1 = "bg-color1", CLASS_COLOR_2 = "bg-color2"
-const ID_CONTAINER_1 = "countries-1", ID_CONTAINER_2 = "countries-2"
 
-function Graph() {
-    const InputSection = (id: string, classColourDefault: string, text: string): [React.ReactNode, (color: string) => void] => {
-        const [classColor, setClassColor] = React.useState(classColourDefault)
+function Graph(world: WorldData) {
+    const countries = Object.values(world.countries)
+        .filter(country => country.totalCases > MIN_NUM_CASES)
+        .sort((c0, c1) => c0.totalCases - c1.totalCases)
+        .reverse()
 
-        return [<Section classContainer={Classes("transition-colors duration-200 ease-in-out", classColor)} classContent="text-center">
+    const findCountry = (country: string, cs = countries) => cs.find(c => c.name === country)
+    const [country1, setCountry1] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_1))
+    const [country2, setCountry2] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_2))
+    const [aligned, setAligned] = React.useState(false)
+
+    const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
+    const countryMin = countryMax === country1 ? country2 : country1
+
+    function InputSection(text: string, country: Country, onChange: (country: Country) => void, children?: React.ReactChild): React.ReactNode {
+        const classColor = country === countryMax ? CLASS_COLOR_1 : CLASS_COLOR_2
+        return <Section classContainer={Classes("transition-colors duration-200 ease-in-out", classColor)} classContent="text-center" >
             <div className="mb-5 text-xl">{text}</div>
-            <select id={id} className="rounded px-3 py-2 mx-auto"></select>
-        </Section>, setClassColor]
+            <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(findCountry(country))} />
+            {children && <br />}
+            {children}
+        </Section>
     }
 
-    const [section1, setColorSection1] = InputSection("countries-1", CLASS_COLOR_1, "Where are you?")
-    const [section2, setColorSection2] = InputSection("countries-2", CLASS_COLOR_2, "Compare with...")
+    function SetCountryByPosition(pos: Position) {
+        const dist = (c: Case) => Math.sqrt((c.lat - pos.coords.latitude) ** 2 + (c.lng - pos.coords.longitude) ** 2)
+        const closest = world.cases.map(c => ({ dist: dist(c), case: c })).sort((a, b) => a.dist - b.dist)[0]
+        setCountry1(world.countries[closest.case.country])
+    }
 
-    React.useEffect(() => { makeGraph(setColorSection1, setColorSection2) }, []) // Only on load
+    const section1 = InputSection("Where are you?", country1, setCountry1, FindUserButton(SetCountryByPosition))
+    const section2 = InputSection("Compare with...", country2, setCountry2, <>
+        <label className="mt-5 text-lg bg-white whitespace-no-wrap px-3 py-1 rounded inline-block select-none">
+            <input type="checkbox" defaultChecked={false} onChange={e => setAligned(e.target.checked)}></input>
+            <span className="ml-3">Align</span>
+        </label>
+    </>)
 
     return <>
         {section1} {section2}
-        <div className="flex flex-row justify-center">
-            <input id="toggle" type="checkbox" defaultChecked={false}></input>
-            <label htmlFor="toggle" className="ml-3">Aligned</label>
-        </div>
-        <svg className="mx-auto my-5"></svg>
+        <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
     </>
 }
 
-const makeGraph = (setColorSection1: (color: string) => void, setColorSection2: (color: string) => void) => GetData()
-    .then((world: WorldData) => {
-        const countries = Object.values(world.countries)
-            .filter(country => country.totalCases > MIN_NUM_CASES)
-            .sort((c0, c1) => c0.totalCases - c1.totalCases)
-            .reverse()
+function CountryInput(props: { countries: Country[], country: Country, countryMax: Country, countryMin: Country, onChange: (country: string) => void }) {
+    let hasCountryAsOption = false
+    const getOption = (country: Country) => {
+        const name = country.name
+        hasCountryAsOption = hasCountryAsOption || name === props.country.name // Check our country is in the list
+        const colorClass = name === props.countryMax.name ? CLASS_COLOR_1 : name === props.countryMin.name ? CLASS_COLOR_2 : ""
+        return <option key={name} value={name} className={colorClass}>{`${name} (${country.totalCases})`}</option>
+    }
+    return <select value={props.country.name} onChange={e => props.onChange(e.target.value)} className="rounded px-3 py-2 mx-auto">
+        {props.countries.map(getOption)}
+        {!hasCountryAsOption && getOption(props.country)}
+    </select>
+}
 
-        const select1: HTMLSelectElement = document.getElementById(ID_CONTAINER_1) as HTMLSelectElement
-        const select2: HTMLSelectElement = document.getElementById(ID_CONTAINER_2) as HTMLSelectElement
-        const toggle: HTMLInputElement = document.getElementById('toggle') as HTMLInputElement
+function FindUserButton(findCountry: (pos: Position) => void) {
+    const [searchState, setSearchState] = React.useState<"default" | "searching" | "found" | "failed">("default")
 
-        const updateData = CreateChart(world.dates)
-        PopulateCountryInput(select1, countries, COUNTRY_DEFAULT_1, COUNTRY_DEFAULT_1, COUNTRY_DEFAULT_2)
-        PopulateCountryInput(select2, countries, COUNTRY_DEFAULT_2, COUNTRY_DEFAULT_1, COUNTRY_DEFAULT_2)
+    const found = (pos: Position) => { setSearchState("found"); findCountry(pos) }
+    const error = () => { setSearchState("failed") }
+    const search = () => {
+        setSearchState("searching")
+        navigator.geolocation.getCurrentPosition(found, error)
+    }
 
-        const update = () => {
-            const isAligned = toggle.checked
-            const country1 = world.countries[select1.value], country2 = world.countries[select2.value]
-
-            const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
-            const countryMin = countryMax === country1 ? country2 : country1
-            const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
-
-            PopulateCountryInput(select1, countries, country1.name, countryMax.name, countryMin.name)
-            PopulateCountryInput(select2, countries, country2.name, countryMax.name, countryMin.name)
-
-            const country1IsMax = country1 === countryMax
-            setColorSection1(country1IsMax ? CLASS_COLOR_1 : CLASS_COLOR_2)
-            setColorSection2(country1IsMax ? CLASS_COLOR_2 : CLASS_COLOR_1)
-
-            const indexAtMinNumCasesMax = casesMax.findIndex(_case => _case > MIN_NUM_CASES)
-            const indexAtMinNumCasesMin = casesMin.findIndex(_case => _case > MIN_NUM_CASES)
-            const indexAtMinNumCases = Math.min(indexAtMinNumCasesMin, indexAtMinNumCasesMax)
-
-            casesMax.splice(0, indexAtMinNumCases)
-            casesMin.splice(0, indexAtMinNumCases)
-
-            const matchingIndexMax = casesMax.findIndex(cases => cases >= countryMin.totalCases)
-            const daysBehind = casesMin.length - matchingIndexMax - 1
-
-            const daysBehindText = ` (${daysBehind} day${daysBehind !== 1 ? "s" : ""} behind)`
-            updateData(countryMax.name, countryMin.name + daysBehindText, casesMax, casesMin, isAligned ? -daysBehind : 0)
-        }
-        update()
-
-        select1.addEventListener('change', update)
-        select2.addEventListener('change', update)
-        toggle.addEventListener('change', update)
-    })
-
-function PopulateCountryInput(input: HTMLSelectElement, countries: Country[], countrySelected: string, countryMax: string, countryMin: string) {
-    render(<>
-        {countries.map(country => {
-            const name = country.name
-            const colorClass = name === countryMax ? CLASS_COLOR_1 : name === countryMin ? CLASS_COLOR_2 : ""
-            return <option key={name} value={name} className={colorClass}>{`${name} (${country.totalCases})`}</option>
-        })}
-    </>, input)
-
-    input.value = countrySelected
+    return navigator.geolocation && <>
+        <button onClick={search} className="mt-5 text-lg bg-white whitespace-no-wrap px-3 py-1 rounded inline-block select-none block">
+            <span className="">
+                <FontAwesomeIcon icon="location-arrow" className="mr-2" />
+                {searchState === "searching" ? "Searching..." : searchState === "found" ? "Found" : "Find me!"}
+            </span>
+        </button>
+    </>
 }
 
 export default Graph
