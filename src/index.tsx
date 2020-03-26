@@ -8,6 +8,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { WorldData } from './types';
 import { Section } from './common';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 library.add(fas)
 
@@ -19,7 +20,10 @@ function Home(props: { world: WorldData }) {
     return <>
         <div className="-mb-40">
             <Section classContainer="bg-gray-900 pb-20">
-                <h1 className="text-6xl text-center font-extrabold text-white">Stop Killing People!</h1>
+                <h1 className="text-6xl text-center font-extrabold text-white">
+                    <FontAwesomeIcon icon="flushed" />
+                    <span> Stop Killing People!</span>
+                </h1>
                 <h2 className="text-lg text-center text-white">An interactive COVID-19 growth visualisation.</h2>
             </Section>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 1 1 2" preserveAspectRatio="none" className="w-full h-10 -mb-5 fill-current text-gray-900">

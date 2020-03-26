@@ -30,6 +30,7 @@ module.exports = {
     plugins: [
         new webpack.IgnorePlugin(new RegExp("^(fs|ipc)$")),
         new HtmlWebpackPlugin({
+            favicon: "./images/favicon.svg",
             template: path.join(__dirname, '../src/index.html'),
         }),
     ],
