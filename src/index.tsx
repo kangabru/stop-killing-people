@@ -5,12 +5,13 @@ import GetData from './data';
 import './index.less';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
+import { faGithub, faGithubAlt } from '@fortawesome/free-brands-svg-icons'
+import { faFlushed, faLocationArrow } from '@fortawesome/free-solid-svg-icons'
 import { WorldData } from './types';
 import { Section } from './common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-library.add(fas)
+library.add(faFlushed, faLocationArrow, faGithub, faGithubAlt)
 
 GetData().then((world: WorldData) => {
     render(<Home world={world} />, document.getElementById("root"))
@@ -31,21 +32,11 @@ function Home(props: { world: WorldData }) {
             </svg>
         </div>
         {Graph(props.world)}
-        <Section classContainer="bg-gray-200">
-            {"You're {5} days behind {Italy}"}!
-            <br />
-            {"{Australia} experiencing exponential growth"}
-            <br />
-            {"In the last {5} days {Australia} {200} new cases. This is greater than the total amount {Australia} since the pandemic began."}
-            <br />
-            {"{Australia}'s case growth is {95%} similar to {Italy's}."}
-            <br />
-            {"If {50%} of {Australia} got infected and {3%} die, then {Australia} is facing up to {1,000,000} deaths."}!
-            <br />
-            {"If {50%} of {Australia} got infected, and {3%} die, then {Australia} is facing up to {1,000,000} deaths."}!
-        </Section>
-        <Section classContainer="bg-gray-900 text-white">
-            Kangabru
+        <Section classContainer="bg-gray-900" classContent="flex justify-center">
+            <a className="px-4 py-3 bg-white rounded text-lg font-semibold hover:bg-gray-200" href="https://github.com/kangabru/stop-killing-people">
+                <FontAwesomeIcon icon={['fab', 'github']} />
+                <span> View on GitHub</span>
+            </a>
         </Section>
     </>
 }

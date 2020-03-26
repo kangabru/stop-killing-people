@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { WorldData, Country, Case } from './types';
-import { Section, Classes } from './common';
+import { Section, s } from './common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ChartSvg, { MIN_NUM_CASES } from './chart';
+import ChartSvg, { MIN_NUM_CASES, GetDaysBehind } from './chart';
 
-const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US"
+const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
 function Graph(world: WorldData) {
     const countries = Object.values(world.countries)
@@ -15,10 +15,11 @@ function Graph(world: WorldData) {
     const findCountry = (country: string, cs = countries) => cs.find(c => c.name === country)
     const [country1, setCountry1] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_1))
     const [country2, setCountry2] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_2))
-    const [aligned, setAligned] = React.useState(false)
+    const [aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
 
     const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
     const countryMin = countryMax === country1 ? country2 : country1
+    const daysBehind = GetDaysBehind(countryMax, countryMin)[0]
 
     function InputSection(text: string, country: Country, onChange: (country: Country) => void, children?: React.ReactChild): React.ReactNode {
         const classColor = country === countryMax ? "border-color-max" : "border-color-min"
@@ -40,7 +41,7 @@ function Graph(world: WorldData) {
     const section1 = InputSection("Where are you?", country1, setCountry1, FindUserButton(SetCountryByPosition))
     const section2 = InputSection("Compare with...", country2, setCountry2, <>
         <label className="mt-5 text-lg bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block select-none text-white font-bold">
-            <input type="checkbox" defaultChecked={false} onChange={e => setAligned(e.target.checked)}></input>
+            <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
             <span className="ml-3">Align</span>
         </label>
     </>)
@@ -55,6 +56,12 @@ function Graph(world: WorldData) {
                 <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
             </div>
         </div>
+        <Section classContainer="info-section bg-gray-200">
+            <p className="text-center"><span className="border-b-4 border-color-min">{countryMin.name}</span> is {daysBehind} {s("day", daysBehind)} behind <span className="border-b-4 border-color-max">{countryMax.name}</span>.</p>
+        </Section>
+        <Section classContainer="info-section text-center">
+            <p>Wash your hands, stay inside, avoid people.</p>
+        </Section>
     </>
 }
 

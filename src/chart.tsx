@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 // @ts-ignore
 import d3tip from 'd3-tip';
 import { WorldData, Country } from './types';
+import { s } from './common';
 
 export const MIN_NUM_CASES = 100
 
@@ -26,19 +27,8 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
     React.useEffect(() => {
         const updateIntenral = (update: UpdateChartFunc) => {
             const { aligned, countryMax, countryMin } = props
-            const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
-
-            const indexAtMinNumCasesMax = casesMax.findIndex(_case => _case > MIN_NUM_CASES)
-            const indexAtMinNumCasesMin = casesMin.findIndex(_case => _case > MIN_NUM_CASES)
-            const indexAtMinNumCases = Math.min(indexAtMinNumCasesMin, indexAtMinNumCasesMax)
-
-            casesMax.splice(0, indexAtMinNumCases)
-            casesMin.splice(0, indexAtMinNumCases)
-
-            const matchingIndexMax = casesMax.findIndex(cases => cases >= countryMin.totalCases)
-            const daysBehind = casesMin.length - matchingIndexMax - 1
-
-            const daysBehindText = ` (${daysBehind} day${daysBehind !== 1 ? "s" : ""} behind)`
+            const [daysBehind, casesMax, casesMin] = GetDaysBehind(countryMax, countryMin)
+            const daysBehindText = ` (${daysBehind} ${s("day", daysBehind)} behind)`
 
             update({
                 country1: countryMax.name, country2: countryMin.name, daysBehindText,
@@ -56,6 +46,21 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
     }, [props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
 
     return <svg id={SVG_ID} className="mx-auto"> </svg>
+}
+
+export function GetDaysBehind(countryMax: Country, countryMin: Country): [number, number[], number[]] {
+    const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
+
+    const indexAtMinNumCasesMax = casesMax.findIndex(_case => _case > MIN_NUM_CASES)
+    const indexAtMinNumCasesMin = casesMin.findIndex(_case => _case > MIN_NUM_CASES)
+    const indexAtMinNumCases = Math.min(indexAtMinNumCasesMin, indexAtMinNumCasesMax)
+
+    casesMax.splice(0, indexAtMinNumCases)
+    casesMin.splice(0, indexAtMinNumCases)
+
+    const matchingIndexMax = casesMax.findIndex(cases => cases >= countryMin.totalCases)
+    const daysBehind = casesMin.length - matchingIndexMax - 1
+    return [daysBehind, casesMax, casesMin]
 }
 
 function CreateChart(dates: Date[]): UpdateChartFunc {
