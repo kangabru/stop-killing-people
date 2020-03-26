@@ -61,8 +61,8 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
 function CreateChart(dates: Date[]): UpdateChartFunc {
     // Root svg element
     const svg = d3.select(`#${SVG_ID}`)
-        .attr("height", height)
-        .attr("width", width)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", `0 0 ${width} ${height}`)
 
     const title = svg.append("text")
         .attr("x", width / 2)

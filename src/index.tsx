@@ -20,7 +20,7 @@ function Home(props: { world: WorldData }) {
     return <>
         <div className="-mb-40">
             <Section classContainer="bg-gray-900 pb-20">
-                <h1 className="text-6xl text-center font-extrabold text-white">
+                <h1 className="text-2xl md:text-4xl lg:text-6xl text-center font-extrabold text-white">
                     <FontAwesomeIcon icon="flushed" />
                     <span> Stop Killing People!</span>
                 </h1>

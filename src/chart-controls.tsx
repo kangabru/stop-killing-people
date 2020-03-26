@@ -50,7 +50,11 @@ function Graph(world: WorldData) {
             {section1}
             {section2}
         </div>
-        <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
+        <div className="container mx-auto">
+            <div className="mx-auto max-w-3xl">
+                <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
+            </div>
+        </div>
     </>
 }
 
@@ -62,7 +66,7 @@ function CountryInput(props: { countries: Country[], country: Country, countryMa
         const colorClass = name === props.countryMax.name ? "bg-color-max" : name === props.countryMin.name ? "bg-color-min" : ""
         return <option key={name} value={name} className={colorClass}>{`${name} (${country.totalCases})`}</option>
     }
-    return <select value={props.country.name} onChange={e => props.onChange(e.target.value)} className="px-3 py-2 mx-auto rounded border border-gray-400">
+    return <select value={props.country.name} onChange={e => props.onChange(e.target.value)} className="px-3 py-2 mx-auto rounded border border-gray-400 max-w-full">
         {props.countries.map(getOption)}
         {!hasCountryAsOption && getOption(props.country)}
     </select>
