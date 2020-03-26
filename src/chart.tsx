@@ -12,7 +12,7 @@ const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
 
 const SVG_ID = "svg-root"
-const color1 = "svg-color1", color2 = "svg-color2"
+const color1 = "svg-color-max", color2 = "svg-color-min"
 
 type UpdateChartProps = { country1: string, country2: string, daysBehindText: string, data1: number[], data2: number[], daysOffset: number }
 type UpdateChartFunc = (props: UpdateChartProps) => void
@@ -55,7 +55,7 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
         }
     }, [props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
 
-    return <svg id={SVG_ID} className="mx-auto my-5"> </svg>
+    return <svg id={SVG_ID} className="mx-auto"> </svg>
 }
 
 function CreateChart(dates: Date[]): UpdateChartFunc {

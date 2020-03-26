@@ -7,4 +7,18 @@
 */
 
 module.exports = {
+    theme: {
+        extend: {
+            colors: {
+                "color-max": {
+                    default: "hsl(203, 95%, 77%)",
+                    light: "hsl(203, 95%, 90%)",
+                },
+                "color-min": {
+                    default: "hsl(350, 100%, 79%)",
+                    light: "hsl(350, 100%, 90%)",
+                },
+            },
+        }
+    }
 }

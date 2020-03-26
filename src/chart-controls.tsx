@@ -2,10 +2,9 @@ import * as React from 'react';
 import { WorldData, Country, Case } from './types';
 import { Section, Classes } from './common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ChartSvg, { MIN_NUM_CASES } from './plot';
+import ChartSvg, { MIN_NUM_CASES } from './chart';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US"
-const CLASS_COLOR_1 = "bg-color1", CLASS_COLOR_2 = "bg-color2"
 
 function Graph(world: WorldData) {
     const countries = Object.values(world.countries)
@@ -22,13 +21,14 @@ function Graph(world: WorldData) {
     const countryMin = countryMax === country1 ? country2 : country1
 
     function InputSection(text: string, country: Country, onChange: (country: Country) => void, children?: React.ReactChild): React.ReactNode {
-        const classColor = country === countryMax ? CLASS_COLOR_1 : CLASS_COLOR_2
-        return <Section classContainer={Classes("transition-colors duration-200 ease-in-out", classColor)} classContent="text-center" >
-            <div className="mb-5 text-xl">{text}</div>
+        const classColor = country === countryMax ? "border-color-max" : "border-color-min"
+        return <div className={"mb-5 md:mb-0 flex-1 mx-3 transition-colors rounded duration-200 ease-in-out text-center bg-gray-100 p-5 border-b-8 " + classColor} >
+            <span className="mb-5 text-xl px-4 py-2 inline-block font-bold text-gray-900">{text}</span>
+            <br />
             <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(findCountry(country))} />
             {children && <br />}
             {children}
-        </Section>
+        </div >
     }
 
     function SetCountryByPosition(pos: Position) {
@@ -39,14 +39,17 @@ function Graph(world: WorldData) {
 
     const section1 = InputSection("Where are you?", country1, setCountry1, FindUserButton(SetCountryByPosition))
     const section2 = InputSection("Compare with...", country2, setCountry2, <>
-        <label className="mt-5 text-lg bg-white whitespace-no-wrap px-3 py-1 rounded inline-block select-none">
+        <label className="mt-5 text-lg bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block select-none text-white font-bold">
             <input type="checkbox" defaultChecked={false} onChange={e => setAligned(e.target.checked)}></input>
             <span className="ml-3">Align</span>
         </label>
     </>)
 
     return <>
-        {section1} {section2}
+        <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
+            {section1}
+            {section2}
+        </div>
         <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
     </>
 }
@@ -56,10 +59,10 @@ function CountryInput(props: { countries: Country[], country: Country, countryMa
     const getOption = (country: Country) => {
         const name = country.name
         hasCountryAsOption = hasCountryAsOption || name === props.country.name // Check our country is in the list
-        const colorClass = name === props.countryMax.name ? CLASS_COLOR_1 : name === props.countryMin.name ? CLASS_COLOR_2 : ""
+        const colorClass = name === props.countryMax.name ? "bg-color-max" : name === props.countryMin.name ? "bg-color-min" : ""
         return <option key={name} value={name} className={colorClass}>{`${name} (${country.totalCases})`}</option>
     }
-    return <select value={props.country.name} onChange={e => props.onChange(e.target.value)} className="rounded px-3 py-2 mx-auto">
+    return <select value={props.country.name} onChange={e => props.onChange(e.target.value)} className="px-3 py-2 mx-auto rounded border border-gray-400">
         {props.countries.map(getOption)}
         {!hasCountryAsOption && getOption(props.country)}
     </select>
@@ -76,7 +79,7 @@ function FindUserButton(findCountry: (pos: Position) => void) {
     }
 
     return navigator.geolocation && <>
-        <button onClick={search} className="mt-5 text-lg bg-white whitespace-no-wrap px-3 py-1 rounded inline-block select-none block">
+        <button onClick={search} className="mt-5 text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block">
             <span className="">
                 <FontAwesomeIcon icon="location-arrow" className="mr-2" />
                 {searchState === "searching" ? "Searching..." : searchState === "found" ? "Found" : "Find me!"}
