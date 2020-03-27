@@ -37,7 +37,7 @@ function Home(props: { world: WorldData }) {
         <Section classContainer="bg-gray-900" classContent="flex flex-col sm:flex-row items-center justify-evenly">
             <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank" className="text-white text-center mb-5 sm:mb-0">
                 <span className="font-semibold">Source:</span><br />
-                <span className="text-blue-400">John Hopkin CSSE</span>
+                <span className="text-blue-400">John Hopkins CSSE</span>
             </a>
             <a className="px-4 py-3 bg-white rounded text-lg font-semibold hover:bg-gray-200" href="https://github.com/kangabru/stop-killing-people">
                 <FontAwesomeIcon icon={['fab', 'github']} />
