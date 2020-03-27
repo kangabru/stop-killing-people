@@ -1,8 +1,8 @@
 import * as d3 from 'd3';
 import { INDEX, WorldData, CountryIndex, Case, Country } from './types';
 
-const LOCAL = "data/cases.csv"
-const CONFIRMED = "https://www.gitcdn.xyz/repo/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+const LOCAL = "data/confirmed.csv"
+const CONFIRMED = "https://gitcdn.link/repo/kangabru/stop-killing-people/data/data/confirmed.csv"
 
 const DATA_URL = process.env.NODE_ENV == 'production' ? CONFIRMED : LOCAL
 
