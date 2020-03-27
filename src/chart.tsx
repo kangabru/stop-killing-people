@@ -98,18 +98,6 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
     const xAxis = chart.append("g").attr("class", "axis x").attr("y", 100).attr("transform", `translate(0, ${margin.top + heightPlot})`)
     const yAxis = chart.append("g").attr("class", "axis y")
 
-    let tip = d3tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html((num: number, i: number) => {
-            const date = new Date(dates[i])
-            const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
-            const [{ value: mo }, , { value: da }, , { value: ye }] = dtf.formatToParts(date)
-            const date_pretty = `${da}-${mo}-${ye}`
-            return `<strong>${num} cases</strong><br>${date_pretty}`
-        })
-    chart.call(tip)
-
     const bars1 = chart.append('g')
     const bars2 = chart.append('g').attr("transform", `translate(0, 0)`)
 
@@ -118,6 +106,7 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
 
         const { country1, country2, daysBehindText, data1, data2, daysOffset } = props
         const numPoints = d3.max([data1.length, data2.length])
+        const tipDates = dates.slice(-numPoints)
 
         updateInfo(country1, country2, daysBehindText)
 
@@ -127,6 +116,18 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
 
         xAxis.transition().call(d3.axisBottom(x).ticks(10))
         yAxis.transition().call(d3.axisLeft(y).ticks(10))
+
+        const tip = d3tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html((num: number, i: number) => {
+                const date = new Date(tipDates[i])
+                const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
+                const [{ value: mo }, , { value: da }, , { value: ye }] = dtf.formatToParts(date)
+                const date_pretty = `${da}-${mo}-${ye}`
+                return `<strong>${num} cases</strong><br>${date_pretty}`
+            })
+        chart.call(tip)
 
         function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string, offset: boolean) {
             const rect = bars.selectAll('.bar').data(cases).join(
