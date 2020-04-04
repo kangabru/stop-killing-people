@@ -77,7 +77,7 @@ function LoadingPage() {
                 currentTimeout = setTimeout(() => {
                     setStage(stages[index])
                     makeTimeout(index + 1)
-                }, 2000)
+                }, 2000) as any as number
             else
                 currentTimeout = null
         }
