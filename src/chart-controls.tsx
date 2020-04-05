@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { WorldData, Country, Case } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ChartSvg, { MIN_NUM_CASES } from './chart';
+import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true

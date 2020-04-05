@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { WorldData, Country } from './types';
 import { Section, s, Classes } from './common';
-import { GetDaysBehind } from './chart';
+import { GetDaysBehind } from './chart-svg';
 import { PastDays, FutureDays, getCasesDataSinceDate, getAvgGrowthRate, getEstimatedGrowthCases } from './chart-data';
 
 function ChartDataSections(props: { casesTerm: string, countryMin: Country, countryMax: Country, countrySelected: Country }) {
