@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import Graph from './chart-controls';
+import Graph from './chart';
 import GetData from './data';
 import './index.less';
 
