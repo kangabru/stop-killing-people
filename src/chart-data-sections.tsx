@@ -43,8 +43,8 @@ function ChartDataSections(props: { casesTerm: string, countryMin: Country, coun
         </Section>
         <Section classContainer="info-section bg-gray-800 text-white">
             <p className="text-center">{spanSelect} is growing at {growthDisplay.toFixed(0)}% per day on average.</p>
-            {doubleDays && <p className="text-center">That a doubling of {casesTerm} every {doubleDays} days.</p>}
-            <p className="text-center">At that rate you'll have ~{estGrowthCases} new {casesTerm} {futureTimeSelect}.</p>
+            {doubleDays && <p className="text-center">That a doubling of {casesTerm} every {doubleDays - 1}-{doubleDays} days.</p>}
+            <p className="text-center">At that rate you'll have ~{estGrowthCases} {casesTerm} {futureTimeSelect}.</p>
         </Section>
         <Section classContainer="info-section text-center">
             <p>Wash your hands, stay inside, avoid people.</p>
