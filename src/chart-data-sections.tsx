@@ -5,6 +5,10 @@ import { GetDaysBehind } from './chart-svg';
 import { PastDays, FutureDays, getCasesDataSinceDate, getAvgGrowthRate, getEstimatedGrowthCases } from './chart-data';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as Icons from "./icons";
+import "../images/baguette.svg"
+import "../images/banana.svg"
+import "../images/crocodile.svg"
+import "../images/person.svg"
 
 function ChartDataSections(props: { casesTerm: string, countryMin: Country, countryMax: Country, countrySelected: Country }) {
     const { casesTerm, countryMin, countryMax, countrySelected } = props
