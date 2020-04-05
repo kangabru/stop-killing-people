@@ -6,21 +6,9 @@ import './index.less';
 
 import { WorldData } from './types';
 import { Section, Classes } from './common';
-import { library, IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-// Genreal icons
-import { faGithub } from '@fortawesome/free-brands-svg-icons/faGithub'
-import { faFlushed } from '@fortawesome/free-solid-svg-icons/faFlushed'
-import { faLocationArrow } from '@fortawesome/free-solid-svg-icons/faLocationArrow'
-
-// Faces for loading screen
-import { faSmile } from '@fortawesome/free-solid-svg-icons/faSmile'
-import { faMeh } from '@fortawesome/free-solid-svg-icons/faMeh'
-import { faFrownOpen } from '@fortawesome/free-solid-svg-icons/faFrownOpen'
-import { faFrown } from '@fortawesome/free-solid-svg-icons/faFrown'
-
-library.add(faFlushed, faLocationArrow, faGithub, faSmile, faMeh, faFrownOpen, faFrown)
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import * as Icons from "./icons";
 
 render(<Home />, document.getElementById("root"))
 
@@ -61,7 +49,7 @@ function Home() {
 type LoadingStage = { icon: IconDefinition, message: string }
 
 function LoadingPage() {
-    const LoadingIcon = { happy: faSmile, neutral: faMeh, sad: faFrownOpen, broken: faFrown }
+    const LoadingIcon = { happy: Icons.faSmile, neutral: Icons.faMeh, sad: Icons.faFrownOpen, broken: Icons.faFrown }
     const [stage, setStage] = React.useState<LoadingStage>({ icon: LoadingIcon.happy, message: "Loading" })
 
     React.useEffect(() => {
