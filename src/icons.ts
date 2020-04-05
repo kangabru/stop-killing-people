@@ -1,4 +1,4 @@
-import { library, IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { library } from '@fortawesome/fontawesome-svg-core'
 
 // Genreal icons
 import { faGithub } from '@fortawesome/free-brands-svg-icons/faGithub'

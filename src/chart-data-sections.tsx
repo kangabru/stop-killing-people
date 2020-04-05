@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WorldData, Country } from './types';
+import { Country } from './types';
 import { Section, s, Classes } from './common';
 import { GetDaysBehind } from './chart-svg';
 import { PastDays, FutureDays, getCasesDataSinceDate, getAvgGrowthRate, getEstimatedGrowthCases } from './chart-data';
@@ -16,7 +16,7 @@ function ChartDataSections(props: { casesTerm: string, countryMin: Country, coun
     const spanSelectColor = countrySelected === countryMin ? "border-color-min" : "border-color-max"
     const spanSelect = <span className={`border-b-4 ${spanSelectColor}`}>{countrySelected.name}</span>
 
-    const [pastDays, pastTimeTerm, pastTimeSelect] = useSelector({
+    const [pastDays, , pastTimeSelect] = useSelector({
         [PastDays.yesterday]: "yesterday",
         [PastDays.days3]: "the past 3 days",
         [PastDays.week]: "the past week",
@@ -24,7 +24,7 @@ function ChartDataSections(props: { casesTerm: string, countryMin: Country, coun
         [PastDays.month]: "the past month",
     }, PastDays.yesterday)
 
-    const [futureDays, futureTimeTerm, futureTimeSelect] = useSelector({
+    const [futureDays, , futureTimeSelect] = useSelector({
         [FutureDays.tomorrow]: "tomorrow",
         [FutureDays.days3]: "in 3 days",
         [FutureDays.week]: "in a week",
@@ -82,7 +82,7 @@ function SeparationSection() {
     const keyRand = Math.floor(Math.random() * keys.length)
 
     const selectorObject = keys.reduce<{ [key: string]: string }>((obj, curr) => { obj[curr] = curr; return obj; }, {})
-    const [key, _, selector] = useSelector(selectorObject, keys[keyRand], "text-black")
+    const [key, , selector] = useSelector(selectorObject, keys[keyRand], "text-black")
 
     const { count } = Separators[key]
     const [attributionIcon, attributionLinks] = GetIconAttribution()

@@ -129,7 +129,7 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
             })
         chart.call(tip)
 
-        function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string, offset: boolean) {
+        function drawBars(bars: d3.Selection<SVGGElement, unknown, HTMLElement, any>, cases: number[], classes: string) {
             const rect = bars.selectAll('.bar').data(cases).join(
                 enter => enter
                     .append('rect')
@@ -149,8 +149,8 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
                 .attr("height", d => y(0) - y(d))
         }
 
-        drawBars(bars1, data1, color1, false)
-        drawBars(bars2, data2, color2, true)
+        drawBars(bars1, data1, color1)
+        drawBars(bars2, data2, color2)
 
         bars2.transition().attr("transform", `translate(${x(daysOffset)}, 0)`)
     }

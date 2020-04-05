@@ -16,7 +16,7 @@ function Graph(world: WorldData) {
     const [country1, setCountry1] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_1))
     const [country2, setCountry2] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_2))
     const [aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
-    const [useDeaths, setUseDeaths] = React.useState(false)
+    const [useDeaths,] = React.useState(false)
 
     const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
     const countryMin = countryMax === country1 ? country2 : country1
