@@ -1,13 +1,20 @@
-@size: 16px;
-@pad : 4px;
+@size  : 16px;
+@pad   : 4px;
+@color1: #2196F3;
+@color2: hsl(0, 90%, 54%);
 
 .slider {
     display           : block;
     position          : relative;
     cursor            : pointer;
-    background-color  : #ccc;
+    background-color  : @color1;
     -webkit-transition: all .4s ease;
     transition        : all .4s ease;
+    border-radius     : 34px;
+}
+
+.slider:before {
+    border-radius: 50%;
 }
 
 .slider-text {
@@ -27,22 +34,9 @@
 }
 
 input:checked+.slider {
-    background-color: #2196F3;
-}
-
-input:focus+.slider {
-    box-shadow: 0 0 1px #2196F3;
+    background-color: @color2;
 }
 
 input:checked+.slider:before {
     left: calc(100% - @size - @pad);
-}
-
-/* Rounded sliders */
-.slider.round {
-    border-radius: 34px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
 }
