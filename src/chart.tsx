@@ -69,10 +69,8 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
                 </div>
             </>)}
         </div>
-        <div className="container mx-auto">
-            <div className="mx-auto max-w-3xl">
-                <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
-            </div>
+        <div className="container mx-auto max-w-3xl">
+            <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
         </div>
         {timeline}
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
