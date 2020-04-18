@@ -1,5 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core'
 
+/* Note that the we import icon individually otherwise all font-awesome icons will ship and increase the bundle size. */
+
 // Genreal icons
 import { faGithub } from '@fortawesome/free-brands-svg-icons/faGithub'
 import { faFlushed } from '@fortawesome/free-solid-svg-icons/faFlushed'

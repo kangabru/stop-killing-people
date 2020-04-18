@@ -12,14 +12,7 @@
     border-radius   : 34px;
 }
 
-.toggle:before {
-    border-radius: 50%;
-}
-
-.toggle-text {
-    display: block;
-}
-
+// The inner ball inside the toggle.
 .toggle:before {
     position        : absolute;
     content         : "";
@@ -29,6 +22,7 @@
     bottom          : @pad;
     background-color: white;
     transition      : all .4s ease;
+    border-radius   : 50%;
 }
 
 input:checked+.toggle {

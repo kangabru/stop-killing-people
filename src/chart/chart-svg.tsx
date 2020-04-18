@@ -2,8 +2,8 @@ import * as React from 'react';
 import * as d3 from 'd3';
 // @ts-ignore
 import d3tip from 'd3-tip';
-import { Country } from './types';
-import { s } from './common';
+import { Country } from '../types';
+import { s } from '../common/util';
 
 export const MIN_NUM_CASES = 100
 
@@ -18,13 +18,19 @@ const color1 = "svg-color-max", color2 = "svg-color-min"
 type UpdateChartProps = { country1: string, country2: string, daysBehindText: string, dates: Date[], data1: number[], data2: number[], daysOffset: number }
 type UpdateChartFunc = (props: UpdateChartProps) => void
 
+/** Renders the actual SVG chart used to plot data in a graph format.
+ * @remarks
+ * Since we're sing d3 we need to create the svg but update the values independently from react.
+ * We do this by rendering the chart once, and using an update function to set data as needed.
+ */
 function ChartSvg(props: { worldDescription: string, dates: Date[], countryMax: Country, countryMin: Country, aligned: boolean }) {
-    /* Since we're sing d3 we need to create the svg but update the values independently from react.
-    We do this by saving the update function and only updating it when country input changes */
+    // Sets the update function that will be used when input data changes
+    const [updateChart, setUpdateChart] = React.useState<{ update: UpdateChartFunc }>() // Note the initial variable doesn't set unless we wrap the function
 
-    const [updateChart, setUpdateChart] = React.useState<{ update: UpdateChartFunc }>() // Var won't set unless we wrap the function
-
+    // This effect is called on when specific input data updates.
+    // This allows us to only render the SVG once but update it as needed.
     React.useEffect(() => {
+        // Performs the graph update
         const updateInternal = (update: UpdateChartFunc) => {
             const { aligned, dates, countryMax, countryMin } = props
             const [daysBehind, casesMax, casesMin] = GetDaysBehind(countryMax, countryMin)
@@ -36,18 +42,22 @@ function ChartSvg(props: { worldDescription: string, dates: Date[], countryMax: 
             })
         }
 
-        if (updateChart) {
-            updateInternal(updateChart.update)
-        } else {
+        // Creates the graph once then updates it on subsequent calls
+        if (updateChart) updateInternal(updateChart.update)
+        else {
             const update = CreateChart() // Create d3 chart
             updateInternal(update) // Init chart
             setUpdateChart({ update }) // Set func for future use
         }
-    }, [props.worldDescription, props.dates.length, props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
+    }, [props.worldDescription, props.dates.length, props.countryMax.name, props.countryMin.name, props.aligned]) // Effect is updated when this data changes
 
-    return <svg id={SVG_ID} className="mx-auto"> </svg>
+    // Return the root SVG element that d3 will find and use to render the plot data
+    return <svg id={SVG_ID} className="mx-auto"></svg>
 }
 
+/** Calculates the number of days the min and max country are to each other.
+ * This is used to align the two country graphs to each other if the user has selected that option.
+ * */
 export function GetDaysBehind(countryMax: Country, countryMin: Country): [number, number[], number[]] {
     const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
 
@@ -63,6 +73,7 @@ export function GetDaysBehind(countryMax: Country, countryMin: Country): [number
     return [daysBehind, casesMax, casesMin]
 }
 
+/** Initialises the d3 graph and returns a function which can be used to update the data as needed. */
 function CreateChart(): UpdateChartFunc {
     // Root svg element
     const svg = d3.select(`#${SVG_ID}`)
@@ -74,11 +85,13 @@ function CreateChart(): UpdateChartFunc {
         .attr("y", margin.top)
         .attr("text-anchor", "middle")
 
+    // Create the legend
     svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 30).attr("r", 6).attr("class", color1)
     svg.append("circle").attr("cx", margin.left + 20).attr("cy", margin.top + 50).attr("r", 6).attr("class", color2)
     const legend1 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 35)
     const legend2 = svg.append("text").attr("x", margin.left + 35).attr("y", margin.top + 55)
 
+    /** Updates title and legend info. */
     function updateInfo(country1: string, country2: string, daysBehindText: string) {
         title.text(country1 + " / " + country2)
         legend1.text(country1)
@@ -101,6 +114,7 @@ function CreateChart(): UpdateChartFunc {
     const bars1 = chart.append('g')
     const bars2 = chart.append('g').attr("transform", `translate(0, 0)`)
 
+    // Here we return a function that can be used to update this graph as needed.
     return (props: UpdateChartProps) => {
         if (!props) return
 
@@ -117,6 +131,7 @@ function CreateChart(): UpdateChartFunc {
         xAxis.transition().call(d3.axisBottom(x).ticks(10))
         yAxis.transition().call(d3.axisLeft(y).ticks(10))
 
+        // Renders info when hovering over the chart data
         const tip = d3tip()
             .attr('class', 'd3-tip')
             .offset([-10, 0])
@@ -152,6 +167,7 @@ function CreateChart(): UpdateChartFunc {
         drawBars(bars1, data1, color1)
         drawBars(bars2, data2, color2)
 
+        // Aligns the two plots with the offset amount
         bars2.transition().attr("transform", `translate(${x(daysOffset)}, 0)`)
     }
 }

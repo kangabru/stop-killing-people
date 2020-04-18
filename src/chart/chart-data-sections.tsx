@@ -1,26 +1,29 @@
 import * as React from 'react';
-import { Country } from './types';
-import { Section, s, Classes } from './common';
+import { Country } from '../types';
+import { Section, s, Classes, Loop } from '../common/util';
 import { GetDaysBehind } from './chart-svg';
 import { PastDays, FutureDays, getCasesDataSinceDate, getAvgGrowthRate, getEstimatedGrowthCases } from './chart-data';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as Icons from "./icons";
-import "../images/baguette.svg"
-import "../images/banana.svg"
-import "../images/crocodile.svg"
-import "../images/person.svg"
+import * as Icons from "../common/icons";
+import "../../images/baguette.svg"
+import "../../images/banana.svg"
+import "../../images/crocodile.svg"
+import "../../images/person.svg"
 
+/** Renders the text section below the graph which allow the user to see and interact with the data in various ways. */
 function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countryMin: Country, countryMax: Country, countrySelected: Country }) {
     const { casesTerm, CasesTerm, countryMin, countryMax, countrySelected } = props
     const daysBehind = GetDaysBehind(countryMax, countryMin)[0]
 
+    // Define appropriately styled spans for the max and min countries
     const spanMin = <span className="border-b-4 border-color-min">{countryMin.name}</span>
     const spanMax = <span className="border-b-4 border-color-max">{countryMax.name}</span>
 
+    // Defines the appropriately style span for the users selected country
     const spanSelectColor = countrySelected === countryMin ? "border-color-min" : "border-color-max"
     const spanCountrySelect = <span className={`border-b-4 ${spanSelectColor}`}>{countrySelected.name}</span>
 
-    const [pastDays, , pastTimeSelect] = useSelector({
+    const [pastDays, pastTimeSelect] = useSelector({
         [PastDays.yesterday]: "yesterday",
         [PastDays.days3]: "3 days ago",
         [PastDays.week]: "last week",
@@ -28,7 +31,7 @@ function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countr
         [PastDays.month]: "last month",
     }, PastDays.yesterday)
 
-    const [futureDays, , futureTimeSelect] = useSelector({
+    const [futureDays, futureTimeSelect] = useSelector({
         [FutureDays.tomorrow]: "tomorrow",
         [FutureDays.days3]: "in 3 days",
         [FutureDays.week]: "in a week",
@@ -36,6 +39,7 @@ function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countr
         [FutureDays.month]: "in a month",
     }, FutureDays.week, "text-black")
 
+    // Get data to display in the sections
     const cases = countrySelected.dailyCases
     const { casesAbsolute, casesGrowth } = getCasesDataSinceDate(cases, pastDays as number)
     const { growthRaw, growthDisplay, doubleDays } = getAvgGrowthRate(cases)
@@ -63,30 +67,31 @@ function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countr
     </>
 }
 
-function useSelector(terms: { [key: string]: string }, defaultTerm: string | number, classses?: string): [string | number, string, JSX.Element] {
+/** Renders a select component which a user can use to change data in the related section. */
+function useSelector(terms: { [key: string]: string }, defaultTerm: string | number, classes?: string): [string | number, JSX.Element] {
     const [termkey, setTermKey] = React.useState(defaultTerm)
-    const term = terms[termkey]
-
-    const allClasses = Classes("px-1 pt-1 pb-2 rounded", classses)
+    const allClasses = Classes("px-1 pt-1 pb-2 rounded", classes)
     const select = <select defaultValue={defaultTerm} className={allClasses} onChange={e => setTermKey(e.currentTarget.value)}>
         {Object.entries(terms).map(([key, message]) => <option key={key} value={key}>{message}</option>)}
     </select>
 
-    return [termkey, term, select]
+    return [termkey, select]
 }
 
+/** Icons to be used in the distance separation illustration. */
 const Separators: { [key: string]: { src: string, count: number } } = {
     "alligator": { src: "images/crocodile.svg", count: 1 },
     "baguettes": { src: "images/baguette.svg", count: 3 },
     "bananas": { src: "images/banana.svg", count: 10 },
 }
 
+/** Renders the distance separation data illustration section. */
 function SeparationSection() {
     const keys = Object.keys(Separators)
     const keyRand = Math.floor(Math.random() * keys.length)
 
     const selectorObject = keys.reduce<{ [key: string]: string }>((obj, curr) => { obj[curr] = curr; return obj; }, {})
-    const [key, , selector] = useSelector(selectorObject, keys[keyRand], "text-black")
+    const [key, selector] = useSelector(selectorObject, keys[keyRand], "text-black")
 
     const { count } = Separators[key]
     const [attributionIcon, attributionLinks] = GetIconAttribution()
@@ -110,10 +115,7 @@ function SeparationDiagram(key: string) {
     </div>
 }
 
-function Loop(count: number) {
-    return [...Array(count).keys()]
-}
-
+/** Renders the info button which can be toggled to show the attribution info required to the use the various icons. */
 function GetIconAttribution(): [JSX.Element, JSX.Element] {
     const [showLinks, setShowLinks] = React.useState(false)
     const toggleLinks = () => setShowLinks(!showLinks)

@@ -1,7 +1,13 @@
 import * as React from 'react';
-import { Section } from "./common";
+import { Section } from "../common/util";
 import './timeline.less';
 
+/**
+ * Renders a slider component which a user can use to change the upper date used by the app.
+ * @param mostRecentDate - The highest date the timeline should use.
+ * @param numberOfDays - The number of days the timeline should use before and up to the most recent date..
+ * @returns The timeline component and the upper date selected.
+ */
 function useTimeline(mostRecentDate: Date, numberOfDays: number): [JSX.Element, Date] {
     const [daysAgo, setDaysAgo] = React.useState(0)
     const change = (e: React.ChangeEvent<HTMLInputElement>) => setDaysAgo(numberOfDays - parseInt(e.currentTarget.value))
@@ -21,6 +27,7 @@ function useTimeline(mostRecentDate: Date, numberOfDays: number): [JSX.Element, 
     return [timeline, upperDate]
 }
 
+/** Returns a time in milliseconds from a given number of days. */
 function getTime(days: number) { return days * 24 * 60 * 60 * 1000 }
 
 export default useTimeline

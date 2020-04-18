@@ -1,17 +1,18 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import Graph from './chart';
-import { GetCases, GetDeaths } from './data';
+import Graph from './chart/chart';
+import { GetCases, GetDeaths } from './common/data';
 import './index.less';
 
 import { WorldData } from './types';
-import { Section, Classes } from './common';
+import { Section, Classes } from './common/util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import * as Icons from "./icons";
+import * as Icons from "./common/icons";
 
 render(<Home />, document.getElementById("root"))
 
+/** Renders the main page components such as the header, graph, and footer. */
 function Home() {
     const [worldCases, setWorldCases] = React.useState<WorldData>(null)
     const [worldDeaths, setWorldDeaths] = React.useState<WorldData>(null)
@@ -52,6 +53,12 @@ function Home() {
 
 type LoadingStage = { icon: IconDefinition, message: string }
 
+/**
+ * Show a loading screen which updates an image and message every few seconds to indicate the state of loading.
+ *
+ * @remarks
+ * If loading is slow or something while downloading data then this tell the user in a friendly way.
+*/
 function LoadingPage() {
     const LoadingIcon = { happy: Icons.faSmile, neutral: Icons.faMeh, sad: Icons.faFrownOpen, broken: Icons.faFrown }
     const [stage, setStage] = React.useState<LoadingStage>({ icon: LoadingIcon.happy, message: "Loading" })

@@ -5,8 +5,6 @@ a {
     @apply text-blue-600;
 }
 
-@import "../node_modules/tailwindcss/utilities.css";
-
 .svg-color-max {
     @apply fill-current opacity-50 text-color-max;
 }
@@ -52,3 +50,7 @@ a {
     left          : 0;
     text-align    : center;
 }
+
+/* We place the tailwind utility import after using Tailwind CSS components as per the doc guidelines.
+ * https: //tailwindcss.com/docs/extracting-components/#extracting-css-components-with-apply */
+@import "../node_modules/tailwindcss/utilities.css";

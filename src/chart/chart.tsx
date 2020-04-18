@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WorldData, Country, Case } from './types';
+import { WorldData, Country, Case } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
@@ -8,18 +8,22 @@ import useTimeline from './timeline';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
+/** Renders the graph and all related components that interact with graph data. */
 function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
+    // Whether to use total case or death data
     const [useDeaths, setUseDeaths] = React.useState(false)
+
     const world: WorldData = useDeaths ? props.worldDeaths : props.worldCases
     const countries = Object.values(world.countries)
         .filter(country => country.totalCases > MIN_NUM_CASES)
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
         .reverse()
 
-    // Timeline stuff
-    const mostRecentDate = world.dates.slice(-1)[0]
-    const numberOfDays = world.dates.length
+    // Create a timeline which lets a user limit the upper date used by the data throughout the app
+    const mostRecentDate = world.dates.slice(-1)[0], numberOfDays = world.dates.length
     const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
+
+    // Filter the dates by the upper date. These dates define all data used throughout the app
     const dates = world.dates.filter(d => d.getTime() < upperDate.getTime())
 
     const findCountry = (country: string) => LimitCountryDates(countries.find(c => c.name === country), dates)
@@ -29,23 +33,26 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
 
     const country1 = findCountry(countryName1), country2 = findCountry(countryName2)
 
+    // Data throughout the app relies on the 'max' and 'min' country to define colours and organise data.
+    // The max country is simply the one which has more cases at the given point in time.
     const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
     const countryMin = countryMax === country1 ? country2 : country1
 
     const casesTerm = useDeaths ? "deaths" : "cases"
     const CasesTerm = useDeaths ? "Deaths" : "Cases"
 
+    /** Renders one of the main input components which contains stuff like a country selector etc. */
     function InputSection(text: string, country: Country, onChange: (countryName: string) => void, children?: React.ReactChild): React.ReactNode {
         const classColor = country === countryMax ? "border-color-max" : "border-color-min"
         return <div className={"mb-5 md:mb-0 flex-1 mx-3 transition-colors rounded duration-200 ease-in-out text-center bg-gray-100 p-5 border-b-8 " + classColor} >
             <span className="mb-5 text-xl px-4 py-2 inline-block font-bold text-gray-900">{text}</span>
             <br />
             <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(country)} />
-            {children && <br />}
             {children}
         </div >
     }
 
+    /** Finds the country closest to the physical location of the user as given by their browser coordinates. */
     function SetCountryByPosition(pos: Position) {
         const dist = (c: Case) => Math.sqrt((c.lat - pos.coords.latitude) ** 2 + (c.lng - pos.coords.longitude) ** 2)
         const closest = world.cases.map(c => ({ dist: dist(c), case: c })).sort((a, b) => a.dist - b.dist)[0]
@@ -79,7 +86,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     </>
 }
 
-/* Returns a new country with all cases limited to the given dates. */
+/** Returns a new country with all cases limited to within the given dates. */
 function LimitCountryDates(country: Country, dates: Date[]): Country {
     const { name, lat, lng, dailyCases } = country
     const newCases = dailyCases.slice(9, dates.length)
@@ -87,6 +94,10 @@ function LimitCountryDates(country: Country, dates: Date[]): Country {
     return { name, lat, lng, totalCases, dailyCases: newCases }
 }
 
+/** Renders a country selector.
+ * @remarks
+ * The currently selected options are highlighted by the appropriate color.
+ */
 function CountryInput(props: { countries: Country[], country: Country, countryMax: Country, countryMin: Country, onChange: (country: string) => void }) {
     let hasCountryAsOption = false
     const getOption = (country: Country) => {
@@ -101,6 +112,9 @@ function CountryInput(props: { countries: Country[], country: Country, countryMa
     </select>
 }
 
+/** Renders the button the user can use to find their location.
+ * @param findCountry - The callback to use when the browser returns the users location.
+ */
 function FindUserButton(findCountry: (pos: Position) => void) {
     const [searchState, setSearchState] = React.useState<"default" | "searching" | "found" | "failed">("default")
 

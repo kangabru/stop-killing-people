@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { INDEX, WorldData, CountryIndex, Case } from './types';
+import { INDEX, WorldData, CountryIndex, Case } from '../types';
 
 const CASES_LOCAL = "data/confirmed.csv"
 const CASES_CONFIRMED = "https://ghcdn.rawgit.org/kangabru/stop-killing-people/data/data/confirmed.csv"
@@ -12,9 +12,16 @@ const DEATHS_URL = process.env.NODE_ENV == 'production' ? DEATHS_CONFIRMED : DEA
 const GetDeaths = () => GetData(DEATHS_URL, 'Deaths')
 const GetCases = () => GetData(CASES_URL, 'Cases')
 
-const GetData = (url: string, description: string) => d3.text(url)
+/**
+ * Fetches data from the given url and transforms it into objects used by the app.
+ * @param url - The url to fetch data from.
+ * @param description - The description to add to the returned {@link WorldData} object.
+ */
+const GetData = (url: string, description: string): Promise<WorldData> => d3.text(url)
     .then(text => d3.csvParseRows(text))
     .then(data => {
+
+        // Parse all rows from the CSV file. These represent countries and smaller geographic regions like states where applicable.
         const dates = Object.values(data[0]).slice(INDEX.DATE_START).map(x => new Date(x))
         const cases: Case[] = data.slice(1).map(row => {
             const _cases = row.slice(INDEX.DATE_START).map(x => +x)
@@ -28,6 +35,7 @@ const GetData = (url: string, description: string) => d3.text(url)
             }
         })
 
+        // Group states into countries
         const countries: CountryIndex = {}
         cases.forEach(_case => {
             const country = countries[_case.country] || {
@@ -64,8 +72,7 @@ const GetData = (url: string, description: string) => d3.text(url)
             }
         });
 
-        const world: WorldData = { description, dates, cases, countries }
-        return world
+        return { description, dates, cases, countries }
     })
 
 export { GetCases, GetDeaths }

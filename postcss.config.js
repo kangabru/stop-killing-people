@@ -24,7 +24,7 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
 module.exports = {
     plugins: [
         require('tailwindcss'),
-        require('autoprefixer'),
+        require('autoprefixer'), // Prefixes browser terms like -webkit- to CSS where appropriate
         ...process.env.NODE_ENV === 'production' ? [cssnano, purgecss] : []
     ]
 }
