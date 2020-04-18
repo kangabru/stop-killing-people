@@ -25,7 +25,7 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
     const [updateChart, setUpdateChart] = React.useState<{ update: UpdateChartFunc }>() // Var won't set unless we wrap the function
 
     React.useEffect(() => {
-        const updateIntenral = (update: UpdateChartFunc) => {
+        const updateInternal = (update: UpdateChartFunc) => {
             const { aligned, countryMax, countryMin } = props
             const [daysBehind, casesMax, casesMin] = GetDaysBehind(countryMax, countryMin)
             const daysBehindText = ` (${daysBehind} ${s("day", daysBehind)} behind)`
@@ -37,13 +37,13 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
         }
 
         if (updateChart) {
-            updateIntenral(updateChart.update)
+            updateInternal(updateChart.update)
         } else {
             const update = CreateChart(props.world.dates) // Create d3 chart
-            updateIntenral(update) // Init chart
+            updateInternal(update) // Init chart
             setUpdateChart({ update }) // Set func for future use
         }
-    }, [props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
+    }, [props.world.description, props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
 
     return <svg id={SVG_ID} className="mx-auto"> </svg>
 }

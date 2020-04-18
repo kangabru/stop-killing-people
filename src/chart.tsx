@@ -7,17 +7,20 @@ import './chart.less';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
-function Graph(world: WorldData) {
+function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
+    const [useDeaths, setUseDeaths] = React.useState(false)
+    const world: WorldData = useDeaths ? props.worldDeaths : props.worldCases
     const countries = Object.values(world.countries)
         .filter(country => country.totalCases > MIN_NUM_CASES)
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
         .reverse()
 
     const findCountry = (country: string, cs = countries) => cs.find(c => c.name === country)
-    const [country1, setCountry1] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_1))
-    const [country2, setCountry2] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_2))
+    const [countryName1, setCountryName1] = React.useState<string>(COUNTRY_DEFAULT_1)
+    const [countryName2, setCountryName2] = React.useState<string>(COUNTRY_DEFAULT_2)
     const [aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
-    const [useDeaths, setUseDeaths] = React.useState(false)
+
+    const country1 = findCountry(countryName1), country2 = findCountry(countryName2)
 
     const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
     const countryMin = countryMax === country1 ? country2 : country1
@@ -25,12 +28,12 @@ function Graph(world: WorldData) {
     const casesTerm = useDeaths ? "deaths" : "cases"
     const CasesTerm = useDeaths ? "Deaths" : "Cases"
 
-    function InputSection(text: string, country: Country, onChange: (country: Country) => void, children?: React.ReactChild): React.ReactNode {
+    function InputSection(text: string, country: Country, onChange: (countryName: string) => void, children?: React.ReactChild): React.ReactNode {
         const classColor = country === countryMax ? "border-color-max" : "border-color-min"
         return <div className={"mb-5 md:mb-0 flex-1 mx-3 transition-colors rounded duration-200 ease-in-out text-center bg-gray-100 p-5 border-b-8 " + classColor} >
             <span className="mb-5 text-xl px-4 py-2 inline-block font-bold text-gray-900">{text}</span>
             <br />
-            <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(findCountry(country))} />
+            <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(country)} />
             {children && <br />}
             {children}
         </div >
@@ -39,13 +42,13 @@ function Graph(world: WorldData) {
     function SetCountryByPosition(pos: Position) {
         const dist = (c: Case) => Math.sqrt((c.lat - pos.coords.latitude) ** 2 + (c.lng - pos.coords.longitude) ** 2)
         const closest = world.cases.map(c => ({ dist: dist(c), case: c })).sort((a, b) => a.dist - b.dist)[0]
-        setCountry1(world.countries[closest.case.country])
+        setCountryName1(closest.case.country)
     }
 
     return <>
         <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
-            {InputSection("Where are you?", country1, setCountry1, FindUserButton(SetCountryByPosition))}
-            {InputSection("Compare with...", country2, setCountry2, <>
+            {InputSection("Where are you?", country1, setCountryName1, FindUserButton(SetCountryByPosition))}
+            {InputSection("Compare with...", country2, setCountryName2, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block">
                         <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>

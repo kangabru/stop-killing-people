@@ -1,12 +1,18 @@
 import * as d3 from 'd3';
 import { INDEX, WorldData, CountryIndex, Case } from './types';
 
-const LOCAL = "data/confirmed.csv"
-const CONFIRMED = "https://ghcdn.rawgit.org/kangabru/stop-killing-people/data/data/confirmed.csv"
+const CASES_LOCAL = "data/confirmed.csv"
+const CASES_CONFIRMED = "https://ghcdn.rawgit.org/kangabru/stop-killing-people/data/data/confirmed.csv"
+const CASES_URL = process.env.NODE_ENV == 'production' ? CASES_CONFIRMED : CASES_LOCAL
 
-const DATA_URL = process.env.NODE_ENV == 'production' ? CONFIRMED : LOCAL
+const DEATHS_LOCAL = "data/deaths.csv"
+const DEATHS_CONFIRMED = "https://ghcdn.rawgit.org/kangabru/stop-killing-people/data/data/deaths.csv"
+const DEATHS_URL = process.env.NODE_ENV == 'production' ? DEATHS_CONFIRMED : DEATHS_LOCAL
 
-const GetData = () => d3.text(DATA_URL)
+const GetDeaths = () => GetData(DEATHS_URL, 'Deaths')
+const GetCases = () => GetData(CASES_URL, 'Cases')
+
+const GetData = (url: string, description: String) => d3.text(url)
     .then(text => d3.csvParseRows(text))
     .then(data => {
         const dates = Object.values(data[0]).slice(INDEX.DATE_START).map(x => new Date(x))
@@ -58,8 +64,8 @@ const GetData = () => d3.text(DATA_URL)
             }
         });
 
-        const world: WorldData = { dates, cases, countries }
+        const world: WorldData = { description, dates, cases, countries }
         return world
     })
 
-export default GetData
+export { GetCases, GetDeaths }

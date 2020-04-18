@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { render } from 'react-dom';
 import Graph from './chart';
-import GetData from './data';
+import { GetCases, GetDeaths } from './data';
 import './index.less';
 
 import { WorldData } from './types';
@@ -13,10 +13,14 @@ import * as Icons from "./icons";
 render(<Home />, document.getElementById("root"))
 
 function Home() {
-    const [world, setWorld] = React.useState<WorldData>(null)
-    React.useEffect(() => { GetData().then((world: WorldData) => setWorld(world)) }, [])
+    const [worldCases, setWorldCases] = React.useState<WorldData>(null)
+    const [worldDeaths, setWorldDeaths] = React.useState<WorldData>(null)
+    React.useEffect(() => {
+        GetCases().then((world: WorldData) => setWorldCases(world))
+        GetDeaths().then((world: WorldData) => setWorldDeaths(world))
+    }, [])
 
-    const hasLoaded = !!world
+    const hasLoaded = !!worldCases && !!worldDeaths
     const isLoading = !hasLoaded
 
     return <div className="flex flex-col min-h-screen">
@@ -32,7 +36,7 @@ function Home() {
                 <path d="M 0 2 Q 0.5 0 1 2 L 1 0 L 0 0 Z"></path>
             </svg>
         </div>
-        {isLoading ? <LoadingPage /> : <Graph {...world} />}
+        {isLoading ? <LoadingPage /> : <Graph {...{ worldCases, worldDeaths }} />}
         <Section classContainer="bg-gray-900" classContent="flex flex-col sm:flex-row items-center justify-evenly">
             <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank" className="text-white text-center mb-5 sm:mb-0">
                 <span className="font-semibold">Source:</span><br />
