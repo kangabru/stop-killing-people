@@ -3,12 +3,12 @@ export const enum FutureDays { tomorrow = 1, days3 = 3, week = 7, weeks2 = 14, m
 
 type Cases = number[]
 
-export function getCasesDataSinceDate(cases: Cases, days: PastDays): { casesAbsolute: number, casesMultiple: number } {
+export function getCasesDataSinceDate(cases: Cases, days: PastDays): { casesAbsolute: number, casesGrowth: number } {
     const casesNow = cases.slice(-1)[0]
     const casesThen = cases.slice(-1 - days)[0]
     const absolute = casesNow - casesThen
-    const multiple = casesNow / casesThen
-    return { casesAbsolute: absolute, casesMultiple: multiple }
+    const multiple = 100 * (casesNow / casesThen - 1)
+    return { casesAbsolute: absolute, casesGrowth: multiple }
 }
 
 export function getAvgGrowthRate(cases: Cases, days = 3): { growthRaw: number, growthDisplay: number, doubleDays: number } {

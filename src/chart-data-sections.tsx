@@ -10,22 +10,22 @@ import "../images/banana.svg"
 import "../images/crocodile.svg"
 import "../images/person.svg"
 
-function ChartDataSections(props: { casesTerm: string, countryMin: Country, countryMax: Country, countrySelected: Country }) {
-    const { casesTerm, countryMin, countryMax, countrySelected } = props
+function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countryMin: Country, countryMax: Country, countrySelected: Country }) {
+    const { casesTerm, CasesTerm, countryMin, countryMax, countrySelected } = props
     const daysBehind = GetDaysBehind(countryMax, countryMin)[0]
 
     const spanMin = <span className="border-b-4 border-color-min">{countryMin.name}</span>
     const spanMax = <span className="border-b-4 border-color-max">{countryMax.name}</span>
 
     const spanSelectColor = countrySelected === countryMin ? "border-color-min" : "border-color-max"
-    const spanSelect = <span className={`border-b-4 ${spanSelectColor}`}>{countrySelected.name}</span>
+    const spanCountrySelect = <span className={`border-b-4 ${spanSelectColor}`}>{countrySelected.name}</span>
 
     const [pastDays, , pastTimeSelect] = useSelector({
         [PastDays.yesterday]: "yesterday",
-        [PastDays.days3]: "the past 3 days",
-        [PastDays.week]: "the past week",
-        [PastDays.weeks2]: "the past 2 weeks",
-        [PastDays.month]: "the past month",
+        [PastDays.days3]: "3 days ago",
+        [PastDays.week]: "last week",
+        [PastDays.weeks2]: "2 weeks ago",
+        [PastDays.month]: "last month",
     }, PastDays.yesterday)
 
     const [futureDays, , futureTimeSelect] = useSelector({
@@ -37,18 +37,18 @@ function ChartDataSections(props: { casesTerm: string, countryMin: Country, coun
     }, FutureDays.week, "text-black")
 
     const cases = countrySelected.dailyCases
-    const { casesAbsolute, casesMultiple } = getCasesDataSinceDate(cases, pastDays as number)
+    const { casesAbsolute, casesGrowth } = getCasesDataSinceDate(cases, pastDays as number)
     const { growthRaw, growthDisplay, doubleDays } = getAvgGrowthRate(cases)
     const estGrowthCases = getEstimatedGrowthCases(countrySelected.totalCases, growthRaw, futureDays as number)
 
     return <>
         <Section classContainer="info-section bg-gray-200">
             <p className="text-center">{spanMin} is {daysBehind} {s("day", daysBehind)} behind {spanMax}.</p>
-            <p className="text-center">{spanSelect} has {casesMultiple.toFixed(1)} times more {casesTerm} than {pastTimeSelect}.</p>
+            <p className="text-center">{CasesTerm} in {spanCountrySelect} grew by {casesGrowth.toFixed(0)}% since {pastTimeSelect}.</p>
             <p className="text-center">That's {casesAbsolute} new {casesTerm}.</p>
         </Section>
         <Section classContainer="info-section bg-gray-800 text-white">
-            <p className="text-center">{spanSelect} is growing at {growthDisplay.toFixed(0)}% per day on average.</p>
+            <p className="text-center">{spanCountrySelect} is growing at {growthDisplay.toFixed(0)}% per day on average.</p>
             {doubleDays && <p className="text-center">That a doubling of {casesTerm} every {doubleDays - 1}-{doubleDays} days.</p>}
             <p className="text-center">At that rate you'll have ~{estGrowthCases} {casesTerm} {futureTimeSelect}.</p>
         </Section>

@@ -21,6 +21,7 @@ function Graph(world: WorldData) {
     const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
     const countryMin = countryMax === country1 ? country2 : country1
     const casesTerm = useDeaths ? "deaths" : "cases"
+    const casesTermCap = useDeaths ? "Deaths" : "Cases"
 
     function InputSection(text: string, country: Country, onChange: (country: Country) => void, children?: React.ReactChild): React.ReactNode {
         const classColor = country === countryMax ? "border-color-max" : "border-color-min"
@@ -54,7 +55,7 @@ function Graph(world: WorldData) {
                 <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
             </div>
         </div>
-        <ChartDataSections {...{ casesTerm, countryMin, countryMax, countrySelected: country1 }} />
+        <ChartDataSections {...{ casesTerm, CasesTerm: casesTermCap, countryMin, countryMax, countrySelected: country1 }} />
     </>
 }
 
