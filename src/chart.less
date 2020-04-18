@@ -1,0 +1,48 @@
+@size: 16px;
+@pad : 4px;
+
+.slider {
+    display           : block;
+    position          : relative;
+    cursor            : pointer;
+    background-color  : #ccc;
+    -webkit-transition: all .4s ease;
+    transition        : all .4s ease;
+}
+
+.slider-text {
+    display: block;
+}
+
+.slider:before {
+    position          : absolute;
+    content           : "";
+    height            : @size;
+    width             : @size;
+    left              : @pad;
+    bottom            : @pad;
+    background-color  : white;
+    -webkit-transition: all .4s ease;
+    transition        : all .4s ease;
+}
+
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked+.slider:before {
+    left: calc(100% - @size - @pad);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}

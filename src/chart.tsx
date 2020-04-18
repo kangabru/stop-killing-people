@@ -3,6 +3,7 @@ import { WorldData, Country, Case } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
+import './chart.less';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
@@ -16,12 +17,13 @@ function Graph(world: WorldData) {
     const [country1, setCountry1] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_1))
     const [country2, setCountry2] = React.useState<Country>(findCountry(COUNTRY_DEFAULT_2))
     const [aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
-    const [useDeaths,] = React.useState(false)
+    const [useDeaths, setUseDeaths] = React.useState(false)
 
     const countryMax = country1.totalCases > country2.totalCases ? country1 : country2
     const countryMin = countryMax === country1 ? country2 : country1
+
     const casesTerm = useDeaths ? "deaths" : "cases"
-    const casesTermCap = useDeaths ? "Deaths" : "Cases"
+    const CasesTerm = useDeaths ? "Deaths" : "Cases"
 
     function InputSection(text: string, country: Country, onChange: (country: Country) => void, children?: React.ReactChild): React.ReactNode {
         const classColor = country === countryMax ? "border-color-max" : "border-color-min"
@@ -44,10 +46,19 @@ function Graph(world: WorldData) {
         <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
             {InputSection("Where are you?", country1, setCountry1, FindUserButton(SetCountryByPosition))}
             {InputSection("Compare with...", country2, setCountry2, <>
-                <label className="mt-5 text-lg bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block select-none text-white font-bold">
-                    <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
-                    <span className="ml-3">Align</span>
-                </label>
+                <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
+                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block">
+                        <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
+                        <span className="ml-3">Align</span>
+                    </label>
+                    <label className="switch ml-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block">
+                        <div className="flex flex-row items-center">
+                            <input className="hidden" type="checkbox" defaultChecked={useDeaths} onChange={e => setUseDeaths(e.target.checked)}></input>
+                            <span className="slider inline-block round w-10 h-6"></span>
+                            <span className="inline-block ml-2">{CasesTerm}</span>
+                        </div>
+                    </label>
+                </div>
             </>)}
         </div>
         <div className="container mx-auto">
@@ -55,7 +66,7 @@ function Graph(world: WorldData) {
                 <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
             </div>
         </div>
-        <ChartDataSections {...{ casesTerm, CasesTerm: casesTermCap, countryMin, countryMax, countrySelected: country1 }} />
+        <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>
 }
 
