@@ -1,7 +1,7 @@
 export const INDEX = { STATE: 0, COUNTRY: 1, LAT: 2, LNG: 3, DATE_START: 4 }
 
 export type WorldData = {
-    description: String, // Deaths or cases
+    description: string, // Deaths or cases
     dates: Date[], // Array of dates matches the case in CaseData
     countries: CountryIndex, // Cases by country
     cases: Case[], // All cases
@@ -15,7 +15,7 @@ export type Country = {
     lat: number,
     lng: number,
     totalCases: number,
-    caseIndex: CaseIndex,
+    caseIndex?: CaseIndex,
     dailyCases: number[],
 }
 

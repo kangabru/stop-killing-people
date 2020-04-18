@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as d3 from 'd3';
 // @ts-ignore
 import d3tip from 'd3-tip';
-import { WorldData, Country } from './types';
+import { Country } from './types';
 import { s } from './common';
 
 export const MIN_NUM_CASES = 100
@@ -15,10 +15,10 @@ const heightPlot = height - margin.top - margin.bottom,
 const SVG_ID = "svg-root"
 const color1 = "svg-color-max", color2 = "svg-color-min"
 
-type UpdateChartProps = { country1: string, country2: string, daysBehindText: string, data1: number[], data2: number[], daysOffset: number }
+type UpdateChartProps = { country1: string, country2: string, daysBehindText: string, dates: Date[], data1: number[], data2: number[], daysOffset: number }
 type UpdateChartFunc = (props: UpdateChartProps) => void
 
-function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Country, aligned: boolean }) {
+function ChartSvg(props: { worldDescription: string, dates: Date[], countryMax: Country, countryMin: Country, aligned: boolean }) {
     /* Since we're sing d3 we need to create the svg but update the values independently from react.
     We do this by saving the update function and only updating it when country input changes */
 
@@ -26,12 +26,12 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
 
     React.useEffect(() => {
         const updateInternal = (update: UpdateChartFunc) => {
-            const { aligned, countryMax, countryMin } = props
+            const { aligned, dates, countryMax, countryMin } = props
             const [daysBehind, casesMax, casesMin] = GetDaysBehind(countryMax, countryMin)
             const daysBehindText = ` (${daysBehind} ${s("day", daysBehind)} behind)`
 
             update({
-                country1: countryMax.name, country2: countryMin.name, daysBehindText,
+                country1: countryMax.name, country2: countryMin.name, daysBehindText, dates,
                 data1: casesMax, data2: casesMin, daysOffset: aligned ? -daysBehind : 0
             })
         }
@@ -39,11 +39,11 @@ function ChartSvg(props: { world: WorldData, countryMax: Country, countryMin: Co
         if (updateChart) {
             updateInternal(updateChart.update)
         } else {
-            const update = CreateChart(props.world.dates) // Create d3 chart
+            const update = CreateChart() // Create d3 chart
             updateInternal(update) // Init chart
             setUpdateChart({ update }) // Set func for future use
         }
-    }, [props.world.description, props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
+    }, [props.worldDescription, props.dates.length, props.countryMax.name, props.countryMin.name, props.aligned]) // Only update on input changes
 
     return <svg id={SVG_ID} className="mx-auto"> </svg>
 }
@@ -63,7 +63,7 @@ export function GetDaysBehind(countryMax: Country, countryMin: Country): [number
     return [daysBehind, casesMax, casesMin]
 }
 
-function CreateChart(dates: Date[]): UpdateChartFunc {
+function CreateChart(): UpdateChartFunc {
     // Root svg element
     const svg = d3.select(`#${SVG_ID}`)
         .attr("preserveAspectRatio", "xMinYMin meet")
@@ -104,7 +104,7 @@ function CreateChart(dates: Date[]): UpdateChartFunc {
     return (props: UpdateChartProps) => {
         if (!props) return
 
-        const { country1, country2, daysBehindText, data1, data2, daysOffset } = props
+        const { country1, country2, daysBehindText, dates, data1, data2, daysOffset } = props
         const numPoints = d3.max([data1.length, data2.length])
         const tipDates = dates.slice(-numPoints)
 

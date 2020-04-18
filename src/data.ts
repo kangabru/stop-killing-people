@@ -12,7 +12,7 @@ const DEATHS_URL = process.env.NODE_ENV == 'production' ? DEATHS_CONFIRMED : DEA
 const GetDeaths = () => GetData(DEATHS_URL, 'Deaths')
 const GetCases = () => GetData(CASES_URL, 'Cases')
 
-const GetData = (url: string, description: String) => d3.text(url)
+const GetData = (url: string, description: string) => d3.text(url)
     .then(text => d3.csvParseRows(text))
     .then(data => {
         const dates = Object.values(data[0]).slice(INDEX.DATE_START).map(x => new Date(x))
