@@ -16,7 +16,13 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
         .reverse()
 
-    const findCountry = (country: string, cs = countries) => cs.find(c => c.name === country)
+    // Timeline stuff
+    const mostRecentDate = world.dates.slice(-1)[0]
+    const numberOfDays = world.dates.length
+    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
+    const dates = world.dates.filter(d => d.getTime() < upperDate.getTime())
+
+    const findCountry = (country: string) => LimitCountryDates(countries.find(c => c.name === country), dates)
     const [countryName1, setCountryName1] = React.useState<string>(COUNTRY_DEFAULT_1)
     const [countryName2, setCountryName2] = React.useState<string>(COUNTRY_DEFAULT_2)
     const [aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
@@ -46,10 +52,6 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
         setCountryName1(closest.case.country)
     }
 
-    const mostRecentDate = world.dates.slice(-1)[0]
-    const numberOfDays = world.dates.length
-    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
-
     return <>
         <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
             {InputSection("Where are you?", country1, setCountryName1, FindUserButton(SetCountryByPosition))}
@@ -70,11 +72,19 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             </>)}
         </div>
         <div className="container mx-auto max-w-3xl">
-            <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
+            <ChartSvg {...{ countryMin, countryMax, aligned, dates, worldDescription: world.description }} />
         </div>
         {timeline}
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>
+}
+
+/* Returns a new country with all cases limited to the given dates. */
+function LimitCountryDates(country: Country, dates: Date[]): Country {
+    const { name, lat, lng, dailyCases } = country
+    const newCases = dailyCases.slice(9, dates.length)
+    const totalCases = newCases.slice(-1)[0]
+    return { name, lat, lng, totalCases, dailyCases: newCases }
 }
 
 function CountryInput(props: { countries: Country[], country: Country, countryMax: Country, countryMin: Country, onChange: (country: string) => void }) {

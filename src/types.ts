@@ -15,7 +15,7 @@ export type Country = {
     lat: number,
     lng: number,
     totalCases: number,
-    caseIndex: CaseIndex,
+    caseIndex?: CaseIndex,
     dailyCases: number[],
 }
 
