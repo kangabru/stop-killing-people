@@ -4,7 +4,6 @@
     "description": "An informational site to explore corona virus data.",
     "scripts": {
         "dev": "webpack-dev-server --config ./webpack/webpack.dev.js --open",
-        "prod": "live-server dist/",
         "build": "webpack --config ./webpack/webpack.prod.js",
         "stats": "webpack --config=webpack/webpack.prod.js --env dev --profile --js > stats.txt"
     },
