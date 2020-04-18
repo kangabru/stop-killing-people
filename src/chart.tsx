@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
 import './chart.less';
+import useTimeline from './timeline';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
@@ -45,6 +46,10 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
         setCountryName1(closest.case.country)
     }
 
+    const mostRecentDate = world.dates.slice(-1)[0]
+    const numberOfDays = world.dates.length
+    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
+
     return <>
         <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
             {InputSection("Where are you?", country1, setCountryName1, FindUserButton(SetCountryByPosition))}
@@ -57,7 +62,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
                     <label className="switch ml-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block">
                         <div className="flex flex-row items-center">
                             <input className="hidden" type="checkbox" defaultChecked={useDeaths} onChange={e => setUseDeaths(e.target.checked)}></input>
-                            <span className="slider inline-block round w-10 h-6"></span>
+                            <span className="toggle inline-block round w-10 h-6"></span>
                             <span className="inline-block ml-2">{CasesTerm}</span>
                         </div>
                     </label>
@@ -69,6 +74,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
                 <ChartSvg world={world} countryMax={countryMax} countryMin={countryMin} aligned={aligned} />
             </div>
         </div>
+        {timeline}
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>
 }

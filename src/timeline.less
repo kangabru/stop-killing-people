@@ -1,0 +1,25 @@
+@color: #2c5282;
+
+.slider-cont {
+    background-color: @color;
+}
+
+.slider {
+    width        : 100%;
+    height       : 15px;
+    border-radius: 5px;
+    background   : white;
+    outline      : none;
+    transition   : opacity .2s;
+}
+
+.slider::-webkit-slider-thumb,
+.slider::-moz-range-thumb {
+    appearance   : none;
+    width        : 25px;
+    height       : 25px;
+    border-radius: 50%;
+    background   : @color;
+    cursor       : pointer;
+    border       : 0.25rem solid white;
+}

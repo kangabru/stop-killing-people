@@ -3,40 +3,38 @@
 @color1: #2196F3;
 @color2: hsl(0, 90%, 54%);
 
-.slider {
-    display           : block;
-    position          : relative;
-    cursor            : pointer;
-    background-color  : @color1;
-    -webkit-transition: all .4s ease;
-    transition        : all .4s ease;
-    border-radius     : 34px;
+.toggle {
+    display         : block;
+    position        : relative;
+    cursor          : pointer;
+    background-color: @color1;
+    transition      : all .4s ease;
+    border-radius   : 34px;
 }
 
-.slider:before {
+.toggle:before {
     border-radius: 50%;
 }
 
-.slider-text {
+.toggle-text {
     display: block;
 }
 
-.slider:before {
-    position          : absolute;
-    content           : "";
-    height            : @size;
-    width             : @size;
-    left              : @pad;
-    bottom            : @pad;
-    background-color  : white;
-    -webkit-transition: all .4s ease;
-    transition        : all .4s ease;
+.toggle:before {
+    position        : absolute;
+    content         : "";
+    height          : @size;
+    width           : @size;
+    left            : @pad;
+    bottom          : @pad;
+    background-color: white;
+    transition      : all .4s ease;
 }
 
-input:checked+.slider {
+input:checked+.toggle {
     background-color: @color2;
 }
 
-input:checked+.slider:before {
+input:checked+.toggle:before {
     left: calc(100% - @size - @pad);
 }
