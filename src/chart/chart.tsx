@@ -3,8 +3,8 @@ import { WorldData, Country, Case } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
-import './chart.less';
 import useTimeline from './timeline';
+import './chart.less';
 
 const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
@@ -29,7 +29,10 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     const findCountry = (country: string) => LimitCountryDates(countries.find(c => c.name === country), dates)
     const [countryName1, setCountryName1] = React.useState<string>(COUNTRY_DEFAULT_1)
     const [countryName2, setCountryName2] = React.useState<string>(COUNTRY_DEFAULT_2)
-    const [aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
+
+    const [soloCountry1, setSoloCountry1] = React.useState(false)
+    const [_aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
+    const aligned = _aligned && !soloCountry1
 
     const country1 = findCountry(countryName1), country2 = findCountry(countryName2)
 
@@ -40,6 +43,12 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
 
     const casesTerm = useDeaths ? "deaths" : "cases"
     const CasesTerm = useDeaths ? "Deaths" : "Cases"
+
+    // Hide country 2 data if the user solos country 1
+    if (soloCountry1) {
+        country2.totalCases = 0
+        country2.dailyCases = []
+    }
 
     /** Renders one of the main input components which contains stuff like a country selector etc. */
     function InputSection(text: string, country: Country, onChange: (countryName: string) => void, children?: React.ReactChild): React.ReactNode {
@@ -62,7 +71,15 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
 
     return <>
         <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
-            {InputSection("Where are you?", country1, setCountryName1, FindUserButton(SetCountryByPosition))}
+            {InputSection("Where are you?", country1, setCountryName1, <>
+                <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
+                    {FindUserButton(SetCountryByPosition)}
+                    <label className="bg-gray-800  ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block">
+                        <input type="checkbox" defaultChecked={soloCountry1} onChange={e => setSoloCountry1(e.target.checked)}></input>
+                        <span className="ml-3">Solo</span>
+                    </label>
+                </div>
+            </>)}
             {InputSection("Compare with...", country2, setCountryName2, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block">
@@ -128,7 +145,7 @@ function FindUserButton(findCountry: (pos: Position) => void) {
     }
 
     return navigator.geolocation && <>
-        <button onClick={search} className="mt-5 text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block">
+        <button onClick={search} className="text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block">
             <span className="">
                 <FontAwesomeIcon icon="location-arrow" className="mr-2" />
                 {searchState === "searching" ? "Searching..." : searchState === "found" ? "Found" : "Find me!"}

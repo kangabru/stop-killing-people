@@ -49,7 +49,9 @@ function ChartSvg(props: { worldDescription: string, dates: Date[], countryMax: 
             updateInternal(update) // Init chart
             setUpdateChart({ update }) // Set func for future use
         }
-    }, [props.worldDescription, props.dates.length, props.countryMax.name, props.countryMin.name, props.aligned]) // Effect is updated when this data changes
+    }, [props.worldDescription, props.dates.length, props.aligned,
+    props.countryMin.name, props.countryMin.dailyCases.length,
+    props.countryMax.name, props.countryMax.dailyCases.length,]) // Effect is updated when this data changes
 
     // Return the root SVG element that d3 will find and use to render the plot data
     return <svg id={SVG_ID} className="mx-auto"></svg>
