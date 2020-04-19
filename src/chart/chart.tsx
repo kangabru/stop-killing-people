@@ -48,6 +48,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             <span className="mb-5 text-xl px-4 py-2 inline-block font-bold text-gray-900">{text}</span>
             <br />
             <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(country)} />
+            <br />
             {children}
         </div >
     }
