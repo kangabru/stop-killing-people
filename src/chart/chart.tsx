@@ -89,6 +89,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
 
 /** Returns a new country with all cases limited to within the given dates. */
 function LimitCountryDates(country: Country, dates: Date[]): Country {
+    if (!country) return { name: "Not Found", lat: 0, lng: 0, totalCases: 0, dailyCases: [] }
     const { name, lat, lng, dailyCases } = country
     const newCases = dailyCases.slice(9, dates.length)
     const totalCases = newCases.slice(-1)[0]
