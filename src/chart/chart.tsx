@@ -30,6 +30,11 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     const [countryName1, setCountryName1] = React.useState<string>(COUNTRY_DEFAULT_1)
     const [countryName2, setCountryName2] = React.useState<string>(COUNTRY_DEFAULT_2)
 
+    const switchCountries = () => {
+        setCountryName1(countryName2);
+        setCountryName2(countryName1);
+    }
+
     const [soloCountry1, setSoloCountry1] = React.useState(false)
     const [_aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
     const aligned = _aligned && !soloCountry1
@@ -53,7 +58,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     /** Renders one of the main input components which contains stuff like a country selector etc. */
     function InputSection(text: string, country: Country, onChange: (countryName: string) => void, children?: React.ReactChild): React.ReactNode {
         const classColor = country === countryMax ? "border-color-max" : "border-color-min"
-        return <div className={"mb-5 md:mb-0 flex-1 mx-3 transition-colors rounded duration-200 ease-in-out text-center bg-gray-100 p-5 border-b-8 " + classColor} >
+        return <div className={"mb-2 md:mb-5 md:mb-0 flex-1 mx-3 transition-colors rounded duration-200 ease-in-out text-center bg-gray-100 p-5 border-b-8 " + classColor} >
             <span className="mb-5 text-xl px-4 py-2 inline-block font-bold text-gray-900">{text}</span>
             <br />
             <CountryInput countries={countries} country={country} countryMax={countryMax} countryMin={countryMin} onChange={country => onChange(country)} />
@@ -70,16 +75,20 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     }
 
     return <>
-        <div className="container mx-auto flex flex-col md:flex-row justify-evenly p-8 mx-10">
+        <div className="container mx-auto flex flex-col md:flex-row justify-evenly items-center p-8 mx-10">
             {InputSection("Where are you?", country1, setCountryName1, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     {FindUserButton(SetCountryByPosition)}
-                    <label className="bg-gray-800  ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block">
+                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block">
                         <input type="checkbox" defaultChecked={soloCountry1} onChange={e => setSoloCountry1(e.target.checked)}></input>
                         <span className="ml-3">Solo</span>
                     </label>
                 </div>
             </>)}
+            <button className="bg-gray-100 h-10 mb-2 md:mb-5 text-gray-800 text-lg rounded whitespace-no-wrap px-3 pt-2 pb-3 border-b-2 border-gray-800"
+                onClick={switchCountries}>
+                <FontAwesomeIcon icon="arrows-alt-h" />
+            </button>
             {InputSection("Compare with...", country2, setCountryName2, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block">

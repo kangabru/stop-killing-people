@@ -13,6 +13,7 @@ import { faMeh } from '@fortawesome/free-solid-svg-icons/faMeh'
 import { faFrownOpen } from '@fortawesome/free-solid-svg-icons/faFrownOpen'
 import { faFrown } from '@fortawesome/free-solid-svg-icons/faFrown'
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle'
+import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons/faArrowsAltH'
 
-library.add(faFlushed, faLocationArrow, faGithub, faSmile, faMeh, faFrownOpen, faFrown, faInfoCircle)
-export { faFlushed, faLocationArrow, faGithub, faSmile, faMeh, faFrownOpen, faFrown, faInfoCircle }
+library.add(faFlushed, faLocationArrow, faGithub, faSmile, faMeh, faFrownOpen, faFrown, faInfoCircle, faArrowsAltH)
+export { faFlushed, faLocationArrow, faGithub, faSmile, faMeh, faFrownOpen, faFrown, faInfoCircle, faArrowsAltH }
