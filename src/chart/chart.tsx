@@ -6,7 +6,7 @@ import ChartDataSections from './chart-data-sections';
 import useTimeline from './timeline';
 import './chart.less';
 
-const COUNTRY_DEFAULT_1 = "Italy", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
+const COUNTRY_DEFAULT_1 = "Spain", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
 
 /** Renders the graph and all related components that interact with graph data. */
 function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
@@ -79,7 +79,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             {InputSection("Where are you?", country1, setCountryName1, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     {FindUserButton(SetCountryByPosition)}
-                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block">
+                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer">
                         <input type="checkbox" defaultChecked={soloCountry1} onChange={e => setSoloCountry1(e.target.checked)}></input>
                         <span className="ml-3">Solo</span>
                     </label>
@@ -91,11 +91,11 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             </button>
             {InputSection("Compare with...", country2, setCountryName2, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
-                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block">
+                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer">
                         <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
                         <span className="ml-3">Align</span>
                     </label>
-                    <label className="switch ml-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block">
+                    <label className="switch ml-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block cursor-pointer">
                         <div className="flex flex-row items-center">
                             <input className="hidden" type="checkbox" defaultChecked={useDeaths} onChange={e => setUseDeaths(e.target.checked)}></input>
                             <span className="toggle inline-block round w-10 h-6"></span>
