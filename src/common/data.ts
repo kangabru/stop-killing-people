@@ -1,4 +1,4 @@
-import * as d3 from 'd3';
+import * as d3 from './d3-rollup';
 import { INDEX, WorldData, CountryIndex, Case } from '../types';
 
 const CASES_LOCAL = "data/confirmed.csv"

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as d3 from 'd3';
+import * as d3 from '../common/d3-rollup';
 // @ts-ignore
 import d3tip from 'd3-tip';
 import { Country } from '../types';
