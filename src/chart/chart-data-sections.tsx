@@ -106,11 +106,19 @@ function SeparationSection() {
 function SeparationDiagram(key: string) {
     const { src, count } = Separators[key]
     const personSrc = "images/person.svg"
-    const personClasses = "h-12 md:h-24 lg:h-40 opacity-75"
+    const personClasses = "opacity-75 h-full"
 
-    return <div className="w-full flex flex-row justify-center items-center">
-        <img className={personClasses + " mr-3"} src={personSrc} alt="Person" />
-        {Loop(count).map(i => <img key={i} className="max-w-xs mr-3" src={src} alt={key} />)}
+    const imageStyle: React.CSSProperties = {
+        height: "80%",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "contain",
+        backgroundImage: `url(${src})`,
+        backgroundPosition: "center",
+    }
+
+    return <div className="w-full flex flex-row justify-center items-center h-12 md:h-24 lg:h-40 space-x-3">
+        <img className={`${personClasses}`} src={personSrc} alt="Person" />
+        {Loop(count).map(i => <div key={i} className="w-full" style={imageStyle}></div>)}
         <img className={personClasses} src={personSrc} alt="Person" />
     </div>
 }
