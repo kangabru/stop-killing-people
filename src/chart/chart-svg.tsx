@@ -7,7 +7,7 @@ import { s } from '../common/util';
 
 export const MIN_NUM_CASES = 100
 
-const margin = { top: 20, right: 20, bottom: 70, left: 50, text: 5 }
+const margin = { top: 20, right: 20, bottom: 70, left: 70, text: 5 }
 const height = 400, width = 600
 const heightPlot = height - margin.top - margin.bottom,
     widthPlot = width - margin.left - margin.right
