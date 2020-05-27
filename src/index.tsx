@@ -2,6 +2,7 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import Graph from './chart/chart';
 import { GetCases, GetDeaths } from './common/data';
+import { HashRouter as Router } from 'react-router-dom';
 import './index.less';
 
 import { WorldData } from './types';
@@ -37,7 +38,9 @@ function Home() {
                 <path d="M 0 2 Q 0.5 0 1 2 L 1 0 L 0 0 Z"></path>
             </svg>
         </div>
-        {isLoading ? <LoadingPage /> : <Graph {...{ worldCases, worldDeaths }} />}
+        <Router>
+            {isLoading ? <LoadingPage /> : <Graph {...{ worldCases, worldDeaths }} />}
+        </Router>
         <Section classContainer="bg-gray-900" classContent="flex flex-col sm:flex-row items-center justify-evenly">
             <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank" className="text-white text-center mb-5 sm:mb-0">
                 <span className="font-semibold">Source:</span><br />

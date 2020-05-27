@@ -5,11 +5,23 @@ import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
 import useTimeline from './timeline';
 import './chart.less';
+import { useHistory, useLocation } from 'react-router-dom';
 
-const COUNTRY_DEFAULT_1 = "Spain", COUNTRY_DEFAULT_2 = "US", DEFAULT_ALIGNED = true
+const DEFAULT_ALIGNED = true
+
+const PARAM_1 = "c1", PARAM_2 = "c2";
 
 /** Renders the graph and all related components that interact with graph data. */
 function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
+    const location = useLocation();
+    const history = useHistory();
+
+    const addParam = (name: string, value: string) => {
+        const params = new URLSearchParams(location.search)
+        params.set(name, value)
+        history.replace("?" + params.toString());
+    }
+
     // Whether to use total case or death data
     const [useDeaths, setUseDeaths] = React.useState(false)
 
@@ -26,9 +38,13 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     // Filter the dates by the upper date. These dates define all data used throughout the app
     const dates = world.dates.filter(d => d.getTime() < upperDate.getTime())
 
+    const searchParams = new URLSearchParams(location.search)
     const findCountry = (country: string) => LimitCountryDates(countries.find(c => c.name === country), dates)
-    const [countryName1, setCountryName1] = React.useState<string>(COUNTRY_DEFAULT_1)
-    const [countryName2, setCountryName2] = React.useState<string>(COUNTRY_DEFAULT_2)
+    const countryName1 = searchParams.get(PARAM_1) ?? countries.slice(1)[0].name
+    const countryName2 = searchParams.get(PARAM_2) ?? countries.slice(0)[0].name
+
+    const setCountryName1 = (country: string) => { addParam(PARAM_1, country); }
+    const setCountryName2 = (country: string) => { addParam(PARAM_2, country); }
 
     const switchCountries = () => {
         setCountryName1(countryName2);
