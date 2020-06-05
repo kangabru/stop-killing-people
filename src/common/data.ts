@@ -2,11 +2,11 @@ import * as d3 from './d3-rollup';
 import { INDEX, WorldData, CountryIndex, Case } from '../types';
 
 const CASES_LOCAL = "data/confirmed.csv"
-const CASES_CONFIRMED = "https://rawcdn.githack.com/CSSEGISandData/COVID-19/be517b48c5930833e3f1e7db925c087c82eaefed/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+const CASES_CONFIRMED = "https://rawcdn.githack.com/CSSEGISandData/COVID-19/be517b48c5930833e3f1e7db925c087c82eaefed/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
 const CASES_URL = process.env.NODE_ENV == 'production' ? CASES_CONFIRMED : CASES_LOCAL
 
 const DEATHS_LOCAL = "data/deaths.csv"
-const DEATHS_CONFIRMED = "https://rawcdn.githack.com/CSSEGISandData/COVID-19/be517b48c5930833e3f1e7db925c087c82eaefed/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+const DEATHS_CONFIRMED = "https://rawcdn.githack.com/CSSEGISandData/COVID-19/be517b48c5930833e3f1e7db925c087c82eaefed/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 const DEATHS_URL = process.env.NODE_ENV == 'production' ? DEATHS_CONFIRMED : DEATHS_LOCAL
 
 const GetDeaths = () => GetData(DEATHS_URL, 'Deaths')
