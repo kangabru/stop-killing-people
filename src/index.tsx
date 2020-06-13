@@ -10,6 +10,7 @@ import { Section, Classes } from './common/util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import * as Icons from "./common/icons";
+import KangabruTag from './common/kangabru';
 
 render(<Home />, document.getElementById("root"))
 
@@ -26,6 +27,7 @@ function Home() {
     const isLoading = !hasLoaded
 
     return <div className="flex flex-col min-h-screen">
+        <KangabruTag />
         <div className="-mb-40">
             <Section classContainer={Classes("bg-gray-900", hasLoaded && "pb-20")}>
                 <h1 className="text-2xl md:text-4xl lg:text-6xl text-center font-extrabold text-white">
