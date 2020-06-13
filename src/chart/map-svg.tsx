@@ -104,12 +104,14 @@ function CreateChart(): UpdateChartFunc {
             .join(
                 enter => enter
                     .append('svg:circle')
-                    .attr("r", r => growthToRadius(r.growth))
+                    .attr("r", 0)
                     .style("fill", "steelblue")
                     .attr("cx", r => r.lat)
                     .attr("cy", r => r.lng)
                     .on('mouseover', tip.show)
-                    .on('mouseout', tip.hide)
+                    .on('mouseout', tip.hide),
+                update => update
+                    .attr("r", r => growthToRadius(r.growth))
             )
 
         circles.transition()
