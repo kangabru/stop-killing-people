@@ -7,6 +7,7 @@ export * from 'd3-axis';
 export * from 'd3-fetch';
 export * from 'd3-dsv';
 export * from 'd3-transition';
+export * from 'd3-geo';
 
 // export * from 'd3-brush';
 // export * from 'd3-chord';
@@ -18,7 +19,6 @@ export * from 'd3-transition';
 // export * from 'd3-ease';
 // export * from 'd3-force';
 // export * from 'd3-format';
-// export * from 'd3-geo';
 // export * from 'd3-hierarchy';
 // export * from 'd3-interpolate';
 // export * from 'd3-path';

@@ -1,13 +1,14 @@
 import * as React from 'react';
-import { WorldData, Country, Case } from '../types';
+import { WorldData, Country, Case, CountryIndex } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
 import useTimeline from './timeline';
 import './chart.less';
 import { useHistory, useLocation } from 'react-router-dom';
+import MapSvg from './map-svg';
 
-const DEFAULT_ALIGNED = true
+const DEFAULT_ALIGNED = false
 
 const PARAM_1 = "c1", PARAM_2 = "c2";
 
@@ -25,23 +26,29 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     // Whether to use total case or death data
     const [useDeaths, setUseDeaths] = React.useState(false)
 
-    const world: WorldData = useDeaths ? props.worldDeaths : props.worldCases
+    const worldRaw: WorldData = useDeaths ? props.worldDeaths : props.worldCases
+
+    // Create a timeline which lets a user limit the upper date used by the data throughout the app
+    const mostRecentDate = worldRaw.dates.slice(-1)[0], numberOfDays = worldRaw.dates.length
+    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
+
+    // Filter the dates by the upper date. These dates define all data used throughout the app
+    const dates = worldRaw.dates.filter(d => d.getTime() < upperDate.getTime())
+    const world = LimitWorldData(worldRaw, dates)
+
+    const totalCases = Object.values(world.countries).reduce((total, country) => total + country.totalCases, 0) || 0
     const countries = Object.values(world.countries)
         .filter(country => country.totalCases > MIN_NUM_CASES)
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
         .reverse()
 
-    // Create a timeline which lets a user limit the upper date used by the data throughout the app
-    const mostRecentDate = world.dates.slice(-1)[0], numberOfDays = world.dates.length
-    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
+    const blankCountry: Country = { name: "NA", lat: 0, lng: 0, totalCases: 0, dailyCases: [] }
+    const findCountry = (country: string) => countries.find(c => c.name === country) ?? blankCountry
 
-    // Filter the dates by the upper date. These dates define all data used throughout the app
-    const dates = world.dates.filter(d => d.getTime() < upperDate.getTime())
-
+    const getDefaultCountryName = (i: number) => countries.length > i ? countries.slice(i)[0].name : null
     const searchParams = new URLSearchParams(location.search)
-    const findCountry = (country: string) => LimitCountryDates(countries.find(c => c.name === country), dates)
-    const countryName1 = searchParams.get(PARAM_1) ?? countries.slice(1)[0].name
-    const countryName2 = searchParams.get(PARAM_2) ?? countries.slice(0)[0].name
+    const countryName1 = searchParams.get(PARAM_1) ?? getDefaultCountryName(1)
+    const countryName2 = searchParams.get(PARAM_2) ?? getDefaultCountryName(0)
 
     const setCountryName1 = (country: string) => { addParam(PARAM_1, country); }
     const setCountryName2 = (country: string) => { addParam(PARAM_2, country); }
@@ -95,7 +102,8 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             {InputSection("Where are you?", country1, setCountryName1, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     {FindUserButton(SetCountryByPosition)}
-                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer">
+                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer"
+                        title="Select to only show this country on the graph">
                         <input type="checkbox" defaultChecked={soloCountry1} onChange={e => setSoloCountry1(e.target.checked)}></input>
                         <span className="ml-3">Solo</span>
                     </label>
@@ -107,16 +115,17 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             </button>
             {InputSection("Compare with...", country2, setCountryName2, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
-                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer">
-                        <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
-                        <span className="ml-3">Align</span>
-                    </label>
-                    <label className="switch ml-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block cursor-pointer">
+                    <label className="switch mr-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block cursor-pointer">
                         <div className="flex flex-row items-center">
                             <input className="hidden" type="checkbox" defaultChecked={useDeaths} onChange={e => setUseDeaths(e.target.checked)}></input>
                             <span className="toggle inline-block round w-10 h-6"></span>
                             <span className="inline-block ml-2">{CasesTerm}</span>
                         </div>
+                    </label>
+                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer"
+                        title="Aligns the total cases of a country to match the cases of the other. Works best when both countries are in exponential growth.">
+                        <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
+                        <span className="ml-3">Align</span>
                     </label>
                 </div>
             </>)}
@@ -125,15 +134,42 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             <ChartSvg {...{ countryMin, countryMax, aligned, dates, worldDescription: world.description }} />
         </div>
         {timeline}
+        <div className="text-2xl sm:text-3xl md:text-4xl text-center">{`Total ${casesTerm}: ${totalCases}`}</div>
+        <div className="container mx-auto max-w-3xl">
+            <MapSvg {...{ world, worldDescription: world.description, casesTerm }} />
+        </div>
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>
+}
+
+/** Returns a new world with all cases limited to within the given dates. */
+function LimitWorldData(world: WorldData, dates: Date[]): WorldData {
+    var countries: CountryIndex = {}
+    Object.values(world.countries).map(c => LimitCountryDates(c, dates)).forEach(c => countries[c.name] = c)
+
+    var cases = Object.values(world.cases).map(c => LimitCaseDates(c, dates))
+
+    return {
+        description: world.description,
+        dates,
+        countries,
+        cases,
+    }
+}
+
+/** Returns a new case with all cases limited to within the given dates. */
+function LimitCaseDates(c: Case, dates: Date[]): Case {
+    const { country, state, lat, lng, dailyCases } = c
+    const newCases = dailyCases.slice(0, dates.length)
+    const totalCases = newCases.slice(-1)[0]
+    return { country, state, lat, lng, totalCases, dailyCases: newCases }
 }
 
 /** Returns a new country with all cases limited to within the given dates. */
 function LimitCountryDates(country: Country, dates: Date[]): Country {
     if (!country) return { name: "Not Found", lat: 0, lng: 0, totalCases: 0, dailyCases: [] }
     const { name, lat, lng, dailyCases } = country
-    const newCases = dailyCases.slice(9, dates.length)
+    const newCases = dailyCases.slice(0, dates.length)
     const totalCases = newCases.slice(-1)[0]
     return { name, lat, lng, totalCases, dailyCases: newCases }
 }
@@ -170,7 +206,8 @@ function FindUserButton(findCountry: (pos: Position) => void) {
     }
 
     return navigator.geolocation && <>
-        <button onClick={search} className="text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block">
+        <button onClick={search} className="text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block"
+            title="Uses your location to quickly populate the data for your country">
             <span className="">
                 <FontAwesomeIcon icon="location-arrow" className="mr-2" />
                 {searchState === "searching" ? "Searching..." : searchState === "found" ? "Found" : "Find me!"}
