@@ -36,6 +36,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     const dates = worldRaw.dates.filter(d => d.getTime() < upperDate.getTime())
     const world = LimitWorldData(worldRaw, dates)
 
+    const totalCases = Object.values(world.countries).reduce((total, country) => total + country.totalCases, 0) || 0
     const countries = Object.values(world.countries)
         .filter(country => country.totalCases > MIN_NUM_CASES)
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
@@ -133,6 +134,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             <ChartSvg {...{ countryMin, countryMax, aligned, dates, worldDescription: world.description }} />
         </div>
         {timeline}
+        <div className="text-2xl sm:text-3xl md:text-4xl text-center">{`Total ${casesTerm}: ${totalCases}`}</div>
         <div className="container mx-auto max-w-3xl">
             <MapSvg {...{ world, worldDescription: world.description }} />
         </div>
