@@ -7,9 +7,9 @@ import { getAvgGrowthRate } from './chart-data';
 
 const SVG_ID = "svg-root-map"
 const height = 600, width = 900
-const growthScale = 5
+const growthScale = 2
 
-type CountryGrowth = { lat: number, lng: number, growth: number }
+type CountryGrowth = { name: string, lat: number, lng: number, growth: number }
 type UpdateChartProps = { growthRates: CountryGrowth[] }
 type UpdateChartFunc = (props: UpdateChartProps) => void
 
@@ -46,9 +46,11 @@ function MapSvg(props: { worldDescription: string, world: WorldData }) {
 
 function getGrowth(world: WorldData): CountryGrowth[] {
     const result: CountryGrowth[] = []
-    for (const country of Object.values(world.cases)) {
-        var growth = getAvgGrowthRate(country.dailyCases)
-        result.push({ lat: country.lat, lng: country.lng, growth: growth.growthRaw })
+    for (const c of Object.values(world.cases)) {
+        var name = c.state ? `${c.country}: ${c.state}` : c.country
+        var growthRaw = getAvgGrowthRate(c.dailyCases).growthRaw
+        var growth = 100 * (growthRaw - 1)
+        result.push({ name, lat: c.lat, lng: c.lng, growth })
     }
     return result
 }
@@ -77,28 +79,46 @@ function CreateChart(): UpdateChartFunc {
                 .attr("fill", "#eee")
         });
 
+    const projectGrowth = (x: CountryGrowth): CountryGrowth => {
+        const latLong = projection([x.lng, x.lat])
+        return { ...x, lat: latLong[0], lng: latLong[1] }
+    }
+
     // Here we return a function that can be used to update this graph as needed.
     return (props: UpdateChartProps) => {
         if (!props) return
 
-        var data = props.growthRates.filter(x => !!x.growth).map(x => ({ growth: x.growth, latLong: projection([x.lng, x.lat]) }))
+        const tip = d3tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html((c: CountryGrowth) => {
+                const growthClean = c.growth.toFixed(0)
+                return `<strong>${c.name}</strong><br>${growthClean}%`
+            })
+        mapData.call(tip)
 
-        // mapData.selectAll('circle').remove()
+        var data = props.growthRates.map(projectGrowth)
+
         var circles = mapData.selectAll('circle')
             .data(data)
             .join(
                 enter => enter
                     .append('svg:circle')
-                    .attr("r", r => r.growth * growthScale)
+                    .attr("r", r => growthToRadius(r.growth))
                     .style("fill", "steelblue")
-                    .attr("cx", r => r.latLong[0])
-                    .attr("cy", r => r.latLong[1])
+                    .attr("cx", r => r.lat)
+                    .attr("cy", r => r.lng)
+                    .on('mouseover', tip.show)
+                    .on('mouseout', tip.hide)
             )
 
-
         circles.transition()
-            .attr('r', (x, _) => x.growth * growthScale)
+            .attr('r', (x, _) => growthToRadius(x.growth))
     }
+}
+
+function growthToRadius(growth: number): number {
+    return Math.sqrt(growth) * growthScale
 }
 
 export default MapSvg
