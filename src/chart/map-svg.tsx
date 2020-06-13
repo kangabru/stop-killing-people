@@ -10,8 +10,8 @@ const SVG_ID = "svg-root-map"
 const height = 600, width = 900
 const growthScale = 2
 
-type UpdateChartProps = { growthRates: CountryGrowth[] }
 type CaseGrowth = Case & { name: String, growth: number }
+type UpdateChartProps = { growthRates: CaseGrowth[], casesTerm: String }
 type UpdateChartFunc = (props: UpdateChartProps) => void
 
 /** Renders the actual SVG chart used to plot data in a graph format.
@@ -19,7 +19,7 @@ type UpdateChartFunc = (props: UpdateChartProps) => void
  * Since we're sing d3 we need to create the svg but update the values independently from react.
  * We do this by rendering the chart once, and using an update function to set data as needed.
  */
-function MapSvg(props: { worldDescription: string, world: WorldData }) {
+function MapSvg(props: { worldDescription: string, world: WorldData, casesTerm: String }) {
     // Sets the update function that will be used when input data changes
     const [updateChart, setUpdateChart] = React.useState<{ update: UpdateChartFunc }>() // Note the initial variable doesn't set unless we wrap the function
 
@@ -29,7 +29,7 @@ function MapSvg(props: { worldDescription: string, world: WorldData }) {
         // Performs the graph update
         const updateInternal = (update: UpdateChartFunc) => {
             const growthRates = getGrowth(props.world)
-            update({ growthRates })
+            update({ growthRates, casesTerm: props.casesTerm })
         }
 
         // Creates the graph once then updates it on subsequent calls
@@ -94,7 +94,7 @@ function CreateChart(): UpdateChartFunc {
             .offset([-10, 0])
             .html((c: CaseGrowth) => {
                 const growthClean = c.growth.toFixed(0)
-                return `<strong>${c.name}</strong><br>${growthClean}%`
+                return `<strong>${c.name}</strong><br>${growthClean}% growth<br>${c.totalCases} ${props.casesTerm}`
             })
         mapData.call(tip)
 

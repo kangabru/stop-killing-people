@@ -136,7 +136,7 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
         {timeline}
         <div className="text-2xl sm:text-3xl md:text-4xl text-center">{`Total ${casesTerm}: ${totalCases}`}</div>
         <div className="container mx-auto max-w-3xl">
-            <MapSvg {...{ world, worldDescription: world.description }} />
+            <MapSvg {...{ world, worldDescription: world.description, casesTerm }} />
         </div>
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>
