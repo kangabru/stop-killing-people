@@ -9,6 +9,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import MapSvg from './map-svg';
 
 const DEFAULT_ALIGNED = false
+const DEFAULT_MAP_IS_GROWTH = true
 
 const PARAM_1 = "c1", PARAM_2 = "c2";
 
@@ -61,6 +62,9 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     const [soloCountry1, setSoloCountry1] = React.useState(false)
     const [_aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
     const aligned = _aligned && !soloCountry1
+
+    const [showMapGrowth, setShowMapGrowth] = React.useState(DEFAULT_MAP_IS_GROWTH)
+    const toggleGrowthInput = () => setShowMapGrowth(!showMapGrowth)
 
     const country1 = findCountry(countryName1), country2 = findCountry(countryName2)
 
@@ -136,7 +140,17 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
         {timeline}
         <div className="text-2xl sm:text-3xl md:text-4xl text-center">{`Total ${casesTerm}: ${totalCases}`}</div>
         <div className="container mx-auto max-w-3xl">
-            <MapSvg {...{ world, worldDescription: world.description, casesTerm }} />
+            <MapSvg {...{ world, worldDescription: world.description, casesTerm, showMapGrowth }} />
+
+            <div className="mx-auto mb-3 text-center -mt-8">
+                <label className="switch bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block cursor-pointer text-white font-bold">
+                    <div className="flex flex-row items-center">
+                        <input className="hidden" type="checkbox" defaultChecked={DEFAULT_MAP_IS_GROWTH} onChange={toggleGrowthInput}></input>
+                        <span className="toggle plain inline-block round w-10 h-6"></span>
+                        <span className="inline-block ml-2">{showMapGrowth ? "Growth" : "Total"}</span>
+                    </div>
+                </label>
+            </div>
         </div>
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>

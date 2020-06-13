@@ -29,6 +29,10 @@ input:checked+.toggle {
     background-color: @color2;
 }
 
+input:checked+.toggle.plain {
+    background-color: @color1;
+}
+
 input:checked+.toggle:before {
     left: calc(100% - @size - @pad);
 }
