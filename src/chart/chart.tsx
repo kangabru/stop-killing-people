@@ -41,10 +41,13 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
         .reverse()
 
+    const blankCountry: Country = { name: "NA", lat: 0, lng: 0, totalCases: 0, dailyCases: [] }
+    const findCountry = (country: string) => countries.find(c => c.name === country) ?? blankCountry
+
+    const getDefaultCountryName = (i: number) => countries.length > i ? countries.slice(i)[0].name : null
     const searchParams = new URLSearchParams(location.search)
-    const findCountry = (country: string) => countries.find(c => c.name === country)
-    const countryName1 = searchParams.get(PARAM_1) ?? countries.slice(1)[0].name
-    const countryName2 = searchParams.get(PARAM_2) ?? countries.slice(0)[0].name
+    const countryName1 = searchParams.get(PARAM_1) ?? getDefaultCountryName(1)
+    const countryName2 = searchParams.get(PARAM_2) ?? getDefaultCountryName(0)
 
     const setCountryName1 = (country: string) => { addParam(PARAM_1, country); }
     const setCountryName2 = (country: string) => { addParam(PARAM_2, country); }
