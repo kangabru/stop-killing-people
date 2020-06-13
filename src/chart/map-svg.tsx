@@ -100,23 +100,22 @@ function CreateChart(): UpdateChartFunc {
 
         var data = props.growthRates.map(projectGrowth)
 
-        var circles = mapData.selectAll('circle')
-            .data(data)
+        mapData.selectAll('circle')
+            .data(data, (x: any) => x.name)
             .join(
                 enter => enter
                     .append('svg:circle')
-                    .attr("r", 0)
                     .style("fill", "steelblue")
                     .attr("cx", r => r.lat)
                     .attr("cy", r => r.lng)
                     .on('mouseover', tip.show)
                     .on('mouseout', tip.hide),
-                update => update
-                    .attr("r", r => growthToRadius(r.growth))
             )
+            .transition()
+            .attr("r", r => growthToRadius(r.growth))
 
-        circles.transition()
-            .attr('r', (x, _) => growthToRadius(x.growth))
+        mapData.selectAll('circle')
+            .data(data).exit().remove()
     }
 }
 
