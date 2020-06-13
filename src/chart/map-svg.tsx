@@ -81,13 +81,10 @@ function CreateChart(): UpdateChartFunc {
     return (props: UpdateChartProps) => {
         if (!props) return
 
-        mapData.selectAll('circle').remove()
+        var data = props.growthRates.filter(x => !!x.growth).map(x => ({ growth: x.growth, latLong: projection([x.lng, x.lat]) }))
 
-        const { growthRates } = props
-
-        var data = growthRates.filter(x => !!x.growth).map(x => ({ growth: x.growth, latLong: projection([x.lng, x.lat]) }))
-
-        mapData.selectAll('path')
+        // mapData.selectAll('circle').remove()
+        var circles = mapData.selectAll('circle')
             .data(data)
             .join(
                 enter => enter
@@ -95,14 +92,12 @@ function CreateChart(): UpdateChartFunc {
                     .attr("r", r => r.growth * growthScale)
                     .style("fill", "steelblue")
                     .attr("cx", r => r.latLong[0])
-                    .attr("cy", r => r.latLong[1]),
-                exit => exit.remove()
+                    .attr("cy", r => r.latLong[1])
             )
 
-        // for (const growth of growthRate) {
-        //     const mapCoords = projection([growth.lng, growth.lat]);
 
-        // }
+        circles.transition()
+            .attr('r', (x, _) => x.growth * growthScale)
     }
 }
 
