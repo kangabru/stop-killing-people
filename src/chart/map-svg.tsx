@@ -2,15 +2,16 @@ import * as React from 'react';
 import * as d3 from '../common/d3-rollup';
 // @ts-ignore
 import d3tip from 'd3-tip';
-import { WorldData } from '../types';
+import { WorldData, Case } from '../types';
 import { getAvgGrowthRate } from './chart-data';
+import { MIN_NUM_CASES } from './chart-svg';
 
 const SVG_ID = "svg-root-map"
 const height = 600, width = 900
 const growthScale = 2
 
-type CountryGrowth = { name: string, lat: number, lng: number, growth: number }
 type UpdateChartProps = { growthRates: CountryGrowth[] }
+type CaseGrowth = Case & { name: String, growth: number }
 type UpdateChartFunc = (props: UpdateChartProps) => void
 
 /** Renders the actual SVG chart used to plot data in a graph format.
@@ -44,13 +45,13 @@ function MapSvg(props: { worldDescription: string, world: WorldData }) {
     return <svg id={SVG_ID} className="mx-auto"></svg>
 }
 
-function getGrowth(world: WorldData): CountryGrowth[] {
-    const result: CountryGrowth[] = []
-    for (const c of Object.values(world.cases)) {
+function getGrowth(world: WorldData): CaseGrowth[] {
+    const result: CaseGrowth[] = []
+    for (const c of Object.values(world.cases).filter(c => c.totalCases > MIN_NUM_CASES)) {
         var name = c.state ? `${c.country}: ${c.state}` : c.country
         var growthRaw = getAvgGrowthRate(c.dailyCases).growthRaw
         var growth = 100 * (growthRaw - 1)
-        result.push({ name, lat: c.lat, lng: c.lng, growth })
+        result.push({ ...c, name, growth })
     }
     return result
 }
@@ -79,7 +80,7 @@ function CreateChart(): UpdateChartFunc {
                 .attr("fill", "#eee")
         });
 
-    const projectGrowth = (x: CountryGrowth): CountryGrowth => {
+    const projectGrowth = (x: CaseGrowth): CaseGrowth => {
         const latLong = projection([x.lng, x.lat])
         return { ...x, lat: latLong[0], lng: latLong[1] }
     }
@@ -91,7 +92,7 @@ function CreateChart(): UpdateChartFunc {
         const tip = d3tip()
             .attr('class', 'd3-tip')
             .offset([-10, 0])
-            .html((c: CountryGrowth) => {
+            .html((c: CaseGrowth) => {
                 const growthClean = c.growth.toFixed(0)
                 return `<strong>${c.name}</strong><br>${growthClean}%`
             })
