@@ -9,7 +9,7 @@ export function getCasesDataSinceDate(cases: Cases, days: PastDays): { casesAbso
     const casesThen = cases.slice(-1 - days)[0]
     const absolute = casesNow - casesThen
     const multiple = 100 * (casesNow / casesThen - 1)
-    return { casesAbsolute: absolute, casesGrowth: multiple }
+    return { casesAbsolute: absolute || 0, casesGrowth: multiple || 0 }
 }
 
 /** Returns the average growth rate in the past given number of days. */
@@ -24,16 +24,16 @@ export function getAvgGrowthRate(cases: Cases, days = 3): { growthRaw: number, g
         count += 1
     }
 
-    const growthRaw = sum / count
-    const growthDisplay = 100 * (growthRaw - 1)
-    let doubleDays = growthRaw > 1 ? Math.ceil(Math.log(2) / Math.log(growthRaw)) : null
+    const growthRaw = sum > 0 ? sum / count : 0
+    const growthDisplay = sum > 0 ? 100 * (growthRaw - 1) : 0
+    const doubleDays = growthRaw > 1 ? Math.ceil(Math.log(2) / Math.log(growthRaw)) || 0 : null
     return { growthRaw, growthDisplay, doubleDays }
 }
 
 /** Returns the estimated number of cases that will occur after the given time at the given growth. */
 export function getEstimatedGrowthCases(totalCases: number, growthRate: number, days: FutureDays): number {
     const estCases = Math.floor(totalCases * Math.pow(growthRate, days))
-    return Math.floor(GetSignificantFigures(estCases, 2))
+    return Math.floor(GetSignificantFigures(estCases, 2)) || 0
 }
 
 /** Returns the given number rounded to the given number of significant figures.
