@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { WorldData, Country, Case } from '../types';
+import { WorldData, Country, Case, CountryIndex } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ChartSvg, { MIN_NUM_CASES } from './chart-svg';
 import ChartDataSections from './chart-data-sections';
 import useTimeline from './timeline';
 import './chart.less';
 import { useHistory, useLocation } from 'react-router-dom';
+import MapSvg from './map-svg';
 
 const DEFAULT_ALIGNED = true
 
@@ -25,21 +26,23 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     // Whether to use total case or death data
     const [useDeaths, setUseDeaths] = React.useState(false)
 
-    const world: WorldData = useDeaths ? props.worldDeaths : props.worldCases
+    const worldRaw: WorldData = useDeaths ? props.worldDeaths : props.worldCases
+
+    // Create a timeline which lets a user limit the upper date used by the data throughout the app
+    const mostRecentDate = worldRaw.dates.slice(-1)[0], numberOfDays = worldRaw.dates.length
+    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
+
+    // Filter the dates by the upper date. These dates define all data used throughout the app
+    const dates = worldRaw.dates.filter(d => d.getTime() < upperDate.getTime())
+    const world = LimitWorldData(worldRaw, dates)
+
     const countries = Object.values(world.countries)
         .filter(country => country.totalCases > MIN_NUM_CASES)
         .sort((c0, c1) => c0.totalCases - c1.totalCases)
         .reverse()
 
-    // Create a timeline which lets a user limit the upper date used by the data throughout the app
-    const mostRecentDate = world.dates.slice(-1)[0], numberOfDays = world.dates.length
-    const [timeline, upperDate] = useTimeline(mostRecentDate, numberOfDays)
-
-    // Filter the dates by the upper date. These dates define all data used throughout the app
-    const dates = world.dates.filter(d => d.getTime() < upperDate.getTime())
-
     const searchParams = new URLSearchParams(location.search)
-    const findCountry = (country: string) => LimitCountryDates(countries.find(c => c.name === country), dates)
+    const findCountry = (country: string) => countries.find(c => c.name === country)
     const countryName1 = searchParams.get(PARAM_1) ?? countries.slice(1)[0].name
     const countryName2 = searchParams.get(PARAM_2) ?? countries.slice(0)[0].name
 
@@ -125,8 +128,34 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             <ChartSvg {...{ countryMin, countryMax, aligned, dates, worldDescription: world.description }} />
         </div>
         {timeline}
+        <div className="container mx-auto max-w-3xl">
+            <MapSvg {...{ world, worldDescription: world.description }} />
+        </div>
         <ChartDataSections {...{ casesTerm, CasesTerm, countryMin, countryMax, countrySelected: country1 }} />
     </>
+}
+
+/** Returns a new world with all cases limited to within the given dates. */
+function LimitWorldData(world: WorldData, dates: Date[]): WorldData {
+    var countries: CountryIndex = {}
+    Object.values(world.countries).map(c => LimitCountryDates(c, dates)).forEach(c => countries[c.name] = c)
+
+    var cases = Object.values(world.cases).map(c => LimitCaseDates(c, dates))
+
+    return {
+        description: world.description,
+        dates,
+        countries,
+        cases,
+    }
+}
+
+/** Returns a new case with all cases limited to within the given dates. */
+function LimitCaseDates(c: Case, dates: Date[]): Case {
+    const { country, state, lat, lng, dailyCases } = c
+    const newCases = dailyCases.slice(9, dates.length)
+    const totalCases = newCases.slice(-1)[0]
+    return { country, state, lat, lng, totalCases, dailyCases: newCases }
 }
 
 /** Returns a new country with all cases limited to within the given dates. */
