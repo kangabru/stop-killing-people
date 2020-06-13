@@ -8,7 +8,7 @@ import './chart.less';
 import { useHistory, useLocation } from 'react-router-dom';
 import MapSvg from './map-svg';
 
-const DEFAULT_ALIGNED = true
+const DEFAULT_ALIGNED = false
 
 const PARAM_1 = "c1", PARAM_2 = "c2";
 
@@ -101,7 +101,8 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             {InputSection("Where are you?", country1, setCountryName1, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
                     {FindUserButton(SetCountryByPosition)}
-                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer">
+                    <label className="bg-gray-800 ml-2 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer"
+                        title="Select to only show this country on the graph">
                         <input type="checkbox" defaultChecked={soloCountry1} onChange={e => setSoloCountry1(e.target.checked)}></input>
                         <span className="ml-3">Solo</span>
                     </label>
@@ -113,16 +114,17 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
             </button>
             {InputSection("Compare with...", country2, setCountryName2, <>
                 <div className="mt-5 text-lg select-none text-white font-bold flex flex-row justify-center">
-                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer">
-                        <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
-                        <span className="ml-3">Align</span>
-                    </label>
-                    <label className="switch ml-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block cursor-pointer">
+                    <label className="switch mr-2 bg-gray-800 rounded whitespace-no-wrap pl-2 pr-3 py-2 inline-block cursor-pointer">
                         <div className="flex flex-row items-center">
                             <input className="hidden" type="checkbox" defaultChecked={useDeaths} onChange={e => setUseDeaths(e.target.checked)}></input>
                             <span className="toggle inline-block round w-10 h-6"></span>
                             <span className="inline-block ml-2">{CasesTerm}</span>
                         </div>
+                    </label>
+                    <label className="bg-gray-800 rounded whitespace-no-wrap px-3 py-2 inline-block cursor-pointer"
+                        title="Aligns the total cases of a country to match the cases of the other. Works best when both countries are in exponential growth.">
+                        <input type="checkbox" defaultChecked={DEFAULT_ALIGNED} onChange={e => setAligned(e.target.checked)}></input>
+                        <span className="ml-3">Align</span>
                     </label>
                 </div>
             </>)}
@@ -156,7 +158,7 @@ function LimitWorldData(world: WorldData, dates: Date[]): WorldData {
 /** Returns a new case with all cases limited to within the given dates. */
 function LimitCaseDates(c: Case, dates: Date[]): Case {
     const { country, state, lat, lng, dailyCases } = c
-    const newCases = dailyCases.slice(9, dates.length)
+    const newCases = dailyCases.slice(0, dates.length)
     const totalCases = newCases.slice(-1)[0]
     return { country, state, lat, lng, totalCases, dailyCases: newCases }
 }
@@ -165,7 +167,7 @@ function LimitCaseDates(c: Case, dates: Date[]): Case {
 function LimitCountryDates(country: Country, dates: Date[]): Country {
     if (!country) return { name: "Not Found", lat: 0, lng: 0, totalCases: 0, dailyCases: [] }
     const { name, lat, lng, dailyCases } = country
-    const newCases = dailyCases.slice(9, dates.length)
+    const newCases = dailyCases.slice(0, dates.length)
     const totalCases = newCases.slice(-1)[0]
     return { name, lat, lng, totalCases, dailyCases: newCases }
 }
@@ -202,7 +204,8 @@ function FindUserButton(findCountry: (pos: Position) => void) {
     }
 
     return navigator.geolocation && <>
-        <button onClick={search} className="text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block">
+        <button onClick={search} className="text-lg bg-gray-800 text-white font-bold whitespace-no-wrap px-3 py-2 rounded inline-block select-none block"
+            title="Uses your location to quickly populate the data for your country">
             <span className="">
                 <FontAwesomeIcon icon="location-arrow" className="mr-2" />
                 {searchState === "searching" ? "Searching..." : searchState === "found" ? "Found" : "Find me!"}
