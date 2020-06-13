@@ -9,6 +9,8 @@ const DEATHS_LOCAL = "data/deaths.csv"
 const DEATHS_CONFIRMED = "https://rawcdn.githack.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 const DEATHS_URL = process.env.NODE_ENV == 'production' ? DEATHS_CONFIRMED : DEATHS_LOCAL
 
+const MAP_SVG_GEOJSON = "https://rawcdn.githack.com/kangabru/stop-killing-people/data/data/world.geo.json"
+
 const GetDeaths = () => GetData(DEATHS_URL, 'Deaths')
 const GetCases = () => GetData(CASES_URL, 'Cases')
 
@@ -75,4 +77,4 @@ const GetData = (url: string, description: string): Promise<WorldData> => d3.tex
         return { description, dates, cases, countries }
     })
 
-export { GetCases, GetDeaths }
+export { GetCases, GetDeaths, MAP_SVG_GEOJSON }

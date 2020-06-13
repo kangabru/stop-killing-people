@@ -5,6 +5,7 @@ import d3tip from 'd3-tip';
 import { WorldData, Case } from '../types';
 import { getAvgGrowthRate } from './chart-data';
 import { MIN_NUM_CASES } from './chart-svg';
+import { MAP_SVG_GEOJSON } from '../common/data';
 
 const SVG_ID = "svg-root-map"
 const height = 600, width = 900
@@ -69,7 +70,7 @@ function CreateChart(): UpdateChartFunc {
         .translate([width * 4 / 9, height / 2])
     const map = d3.geoPath().projection(projection);
 
-    d3.json("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
+    d3.json(MAP_SVG_GEOJSON)
         .then((uState) => {
             mapProjection.selectAll('path')
                 .data(uState.features)
