@@ -18,9 +18,9 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     const location = useLocation();
     const history = useHistory();
 
-    const addParam = (name: string, value: string) => {
+    const addParam = (...ps: { name: string, value: string }[]) => {
         const params = new URLSearchParams(location.search)
-        params.set(name, value)
+        for (const { name, value } of ps) params.set(name, value)
         history.replace("?" + params.toString());
     }
 
@@ -51,13 +51,10 @@ function Graph(props: { worldCases: WorldData, worldDeaths: WorldData }) {
     const countryName1 = searchParams.get(PARAM_1) ?? getDefaultCountryName(1)
     const countryName2 = searchParams.get(PARAM_2) ?? getDefaultCountryName(0)
 
-    const setCountryName1 = (country: string) => { addParam(PARAM_1, country); }
-    const setCountryName2 = (country: string) => { addParam(PARAM_2, country); }
-
-    const switchCountries = () => {
-        setCountryName1(countryName2);
-        setCountryName2(countryName1);
-    }
+    const setCountryName1 = (country: string) => { addParam({ name: PARAM_1, value: country }); }
+    const setCountryName2 = (country: string) => { addParam({ name: PARAM_2, value: country }); }
+    const switchCountries = () =>
+        addParam({ name: PARAM_1, value: countryName2 }, { name: PARAM_2, value: countryName1 });
 
     const [soloCountry1, setSoloCountry1] = React.useState(false)
     const [_aligned, setAligned] = React.useState(DEFAULT_ALIGNED)
