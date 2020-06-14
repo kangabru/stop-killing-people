@@ -4,6 +4,7 @@ import * as d3 from '../common/d3-rollup';
 import d3tip from 'd3-tip';
 import { Country } from '../types';
 import { s } from '../common/util';
+import { getAvgGrowthRate } from './chart-data';
 
 export const MIN_NUM_CASES = 100
 
@@ -33,12 +34,12 @@ function ChartSvg(props: { worldDescription: string, dates: Date[], countryMax: 
         // Performs the graph update
         const updateInternal = (update: UpdateChartFunc) => {
             const { aligned, dates, countryMax, countryMin } = props
-            const [daysBehind, casesMax, casesMin] = GetDaysBehind(countryMax, countryMin)
-            const daysBehindText = ` (${daysBehind} ${s("day", daysBehind)} behind)`
+            const { realDaysBehind, alignDaysBehind, casesMax, casesMin } = GetDaysBehind(countryMax, countryMin)
+            const daysBehindText = realDaysBehind ? ` (${realDaysBehind} ${s("day", realDaysBehind)} behind)` : ""
 
             update({
                 country1: countryMax.name, country2: countryMin.name, daysBehindText, dates,
-                data1: casesMax, data2: casesMin, daysOffset: aligned ? -daysBehind : 0
+                data1: casesMax, data2: casesMin, daysOffset: aligned ? -alignDaysBehind : 0
             })
         }
 
@@ -60,8 +61,20 @@ function ChartSvg(props: { worldDescription: string, dates: Date[], countryMax: 
 /** Calculates the number of days the min and max country are to each other.
  * This is used to align the two country graphs to each other if the user has selected that option.
  * */
-export function GetDaysBehind(countryMax: Country, countryMin: Country): [number, number[], number[]] {
+export function GetDaysBehind(countryMax: Country, countryMin: Country): { realDaysBehind: number | undefined, alignDaysBehind: number, casesMax: number[], casesMin: number[], } {
     const casesMax = [...countryMax.dailyCases], casesMin = [...countryMin.dailyCases]
+
+    const casesMaxGrowth = getAvgGrowthRate(casesMax).growthRaw
+    const casesMinGrowth = getAvgGrowthRate(casesMin).growthRaw
+    const growthDiff = casesMinGrowth - casesMaxGrowth
+
+    let realDaysBehind: number
+    if (growthDiff * 100 > 0.2) {
+        const totalCasesMax = casesMax.slice(-1)[0]
+        const totalCasesMin = casesMin.slice(-1)[0]
+        const daysBehind = Math.log10(totalCasesMax / totalCasesMin) / Math.log10(casesMinGrowth / casesMaxGrowth)
+        realDaysBehind = Math.floor(daysBehind)
+    }
 
     const indexAtMinNumCasesMax = casesMax.findIndex(_case => _case > MIN_NUM_CASES)
     const indexAtMinNumCasesMin = casesMin.findIndex(_case => _case > MIN_NUM_CASES)
@@ -71,8 +84,8 @@ export function GetDaysBehind(countryMax: Country, countryMin: Country): [number
     casesMin.splice(0, indexAtMinNumCases)
 
     const matchingIndexMax = casesMax.findIndex(cases => cases >= countryMin.totalCases)
-    const daysBehind = casesMin.length - matchingIndexMax - 1
-    return [daysBehind, casesMax, casesMin]
+    const alignDaysBehind = casesMin.length - matchingIndexMax - 1
+    return { realDaysBehind, alignDaysBehind, casesMax, casesMin }
 }
 
 /** Initialises the d3 graph and returns a function which can be used to update the data as needed. */

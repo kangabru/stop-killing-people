@@ -24,8 +24,8 @@ export function getAvgGrowthRate(cases: Cases, days = 3): { growthRaw: number, g
         count += 1
     }
 
-    const growthRaw = sum > 0 ? sum / count : 0
-    const growthDisplay = sum > 0 ? 100 * (growthRaw - 1) : 0
+    const growthRaw = sum > 0 ? sum / count : 0 // 1.06
+    const growthDisplay = sum > 0 ? 100 * (growthRaw - 1) : 0 // 6%
     const doubleDays = growthRaw > 1 ? Math.ceil(Math.log(2) / Math.log(growthRaw)) || 0 : null
     return { growthRaw, growthDisplay, doubleDays }
 }

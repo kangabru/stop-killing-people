@@ -13,7 +13,7 @@ import "../../images/person.svg"
 /** Renders the text section below the graph which allow the user to see and interact with the data in various ways. */
 function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countryMin: Country, countryMax: Country, countrySelected: Country }) {
     const { casesTerm, CasesTerm, countryMin, countryMax, countrySelected } = props
-    const daysBehind = GetDaysBehind(countryMax, countryMin)[0]
+    const daysBehind = GetDaysBehind(countryMax, countryMin).realDaysBehind
 
     // Define appropriately styled spans for the max and min countries
     const spanMin = <span className="border-b-4 border-color-min">{countryMin.name}</span>
@@ -47,7 +47,7 @@ function ChartDataSections(props: { casesTerm: string, CasesTerm: string, countr
 
     return <>
         <Section classContainer="info-section bg-gray-200">
-            <p className="text-center">{spanMin} is {daysBehind} {s("day", daysBehind)} behind {spanMax}.</p>
+            {daysBehind ? <p className="text-center">{spanMin} is {daysBehind} {s("day", daysBehind)} behind {spanMax}.</p> : null}
             <p className="text-center">{CasesTerm} in {spanCountrySelect} grew by {casesGrowth.toFixed(0)}% since {pastTimeSelect}.</p>
             <p className="text-center">That's {casesAbsolute} new {casesTerm}.</p>
         </Section>
