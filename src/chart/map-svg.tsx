@@ -9,7 +9,7 @@ import { MAP_SVG_GEOJSON } from '../common/data';
 
 const SVG_ID = "svg-root-map"
 const height = 600, width = 900
-const growthScale = 2
+const growthScale = 4
 const totalMaxSize = 25
 
 type CaseGrowth = Case & { name: String, growth: number }
