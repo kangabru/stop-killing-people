@@ -167,7 +167,7 @@ function CreateChart(): UpdateChartFunc {
                     .attr('x', (_, i) => x(i))
                     .attr('y', d => y(d))
                     .attr("height", d => height - margin.bottom - y(d))
-                    .attr("width", x(1) - 2)
+                    .attr("width", x(1))
                     .on('mouseover', tip.show)
                     .on('mouseout', tip.hide)
             )
@@ -175,7 +175,7 @@ function CreateChart(): UpdateChartFunc {
             rect.transition()
                 .attr('x', (_, i) => x(i))
                 .attr("y", d => y(d))
-                .attr("width", x(1) - 2)
+                .attr("width", x(1))
                 .attr("height", d => y(0) - y(d))
         }
 
